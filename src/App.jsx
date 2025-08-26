@@ -11,6 +11,8 @@ import Headder from './Headder'
 import './Headder.css'
 import UserPage from './UserPage'
 import AdmiPage from './AdminPage'
+import ProjectDetailPage from './ProjectDetailPage'
+import UserDetailPage from './UserDetailPage'
 
 function App() {
   const [count, setCount] = useState(0)
@@ -23,6 +25,8 @@ function App() {
         <Route path="/signup" element={<Signup/>}/>
         <Route path='/userPage' element={<UserPage/>}/>
         <Route path='/adminpage' element={<AdmiPage/>}/>
+        <Route path='/user/:id' element={<UserDetailPage/>}/>
+        <Route path='/project/:id' element={<ProjectDetailPage/>}/>
       </Routes>
     </Router>
     {/* <Headder/> */}
