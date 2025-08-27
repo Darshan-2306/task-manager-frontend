@@ -14,28 +14,38 @@ function Login() {
   };
 
   const handleLogin = async (e) => {
-    e.preventDefault();
-    try {
-      const response = await fetch("http://localhost:8081/api/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        credentials: "include", 
-        body: JSON.stringify({ email, password }),
-      });
+  e.preventDefault();
+  try {
+    const response = await fetch("http://localhost:8081/api/auth/login", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      credentials: "include",
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await response.text();
+    const data = await response.json();
 
-      if (response.ok) {
-        navigate("/UserPage"); 
+    if (response.ok) {
+   
+      localStorage.setItem("token", data.access_token);
+      localStorage.setItem("role", data.role);
+
+      if (data.role === "Admin") {
+        navigate("/AdminPage");
       } else {
-        setMessage(data);
+        navigate("/UserPage");
       }
-    } catch (error) {
-      setMessage("Error: " + error.message);
+    } else {
+      setMessage(data.message || "Login failed");
     }
-  };
+  } catch (error) {
+    setMessage("Error: " + error.message);
+  }
+};
+
+
 
   return (
     <>

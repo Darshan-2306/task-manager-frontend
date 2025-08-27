@@ -8,7 +8,7 @@ function UserPage() {
   const [tasks, setTasks] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editUser, setEditUser] = useState({});
-  const [newPassword, setNewPassword] = useState(""); // separate state for password
+  const [newPassword, setNewPassword] = useState(""); 
 
   // fetch user details
   useEffect(() => {
