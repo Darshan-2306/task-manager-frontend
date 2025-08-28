@@ -3,7 +3,7 @@ import { useParams, useNavigate } from "react-router-dom";
 import Headder from "./Headder";
 
 function ProjectDetailPage() {
-  const { id } = useParams(); // project ID from URL
+  const { id } = useParams(); 
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
@@ -15,7 +15,7 @@ function ProjectDetailPage() {
 
   const token = localStorage.getItem("token");
 
-  // Fetch project, tasks, and users on load
+
   useEffect(() => {
     const fetchProject = async () => {
       try {
@@ -121,14 +121,12 @@ const handleAssignTask = async () => {
       alert("Please enter both Task ID and User ID");
       return;
     }
-
-    // Convert IDs to integers
     const taskAssignment = {
       taskId: parseInt(assignment.taskId),
       userId: parseInt(assignment.userId)
     };
 
-    // 1️⃣ Assign Task → User
+ 
     const resTask = await fetch(`http://localhost:8081/task_User/admin/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
@@ -137,12 +135,6 @@ const handleAssignTask = async () => {
     });
     if (!resTask.ok) throw new Error("Failed to assign task");
     const dataTask = await resTask.json();
-
-    // 2️⃣ Assign Project → User using project ID from URL
-    const projectAssignment = {
-      projectId: parseInt(id),
-      userId: parseInt(assignment.userId)
-    };
 
   } catch (err) {
     console.error(err);
@@ -203,7 +195,7 @@ const handleAssignTask = async () => {
         ) : <p>No users assigned to this project.</p>}
       </div>
 
-      {/* Assign Task + Project Module */}
+    
       <div className="assign-card big-card">
         <h2>Assign Task to User</h2>
         <input
