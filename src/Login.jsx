@@ -41,7 +41,7 @@ function Login() {
       setMessage(data.message || "Login failed");
     }
   } catch (error) {
-    setMessage("Error: " + error.message);
+    setMessage("Error: invalid details");
   }
 };
 

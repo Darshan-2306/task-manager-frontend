@@ -1,8 +1,10 @@
 import React, { useEffect, useState } from "react";
 import "./UserPage.css";
 import Headder from "./Headder";
+import { useNavigate } from "react-router-dom";
 
 function UserPage() {
+  const navigate = useNavigate();
   const [user, setUser] = useState({});
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
@@ -27,6 +29,7 @@ function UserPage() {
       } catch (err) {
         console.error(err);
         alert("Session expired, please log in again");
+        navigate("/");
       }
     };
 

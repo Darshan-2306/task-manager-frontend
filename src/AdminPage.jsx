@@ -14,6 +14,9 @@ function AdminPage() {
 
   const [searchUserId, setSearchUserId] = useState("");
   const [searchProjectId, setSearchProjectId] = useState("");
+  const [newUser, setNewUser] = useState({});
+const [newProject, setNewProject] = useState({});
+const [newTask, setNewTask] = useState({});
 
   const navigate = useNavigate();
 
@@ -34,6 +37,7 @@ function AdminPage() {
         } catch (err) {
           console.error(err);
           alert("Session expired, please log in again");
+          navigate("/");
         }
       };
   
@@ -122,6 +126,67 @@ function AdminPage() {
       navigate(`/project/${searchProjectId}`);
     }
   };
+
+  // add user
+const handleAddUser = async () => {
+  try {
+    const res = await fetch("http://localhost:8081/user/admin/newUser", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(newUser),
+    });
+
+    if (!res.ok) throw new Error("Failed to add user");
+
+    alert("User added successfully");
+    setNewUser({});
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+
+// add project
+const handleAddProject = async () => {
+  try {
+    const res = await fetch("http://localhost:8081/project/admin/addNewProject", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(newProject),
+    });
+
+    if (!res.ok) throw new Error("Failed to add project");
+
+    alert("Project added successfully");
+    setNewProject({});
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
+
+// add task
+const handleAddTask = async () => {
+  try {
+    const res = await fetch("http://localhost:8081/task/admin/addTask", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(newTask),
+    });
+
+    if (!res.ok) throw new Error("Failed to add task");
+
+    const message = await res.text(); // 👈 important change
+    alert(message);
+    setNewTask({});
+  } catch (err) {
+    alert(err.message);
+  }
+};
+
 
   return (
     <>
@@ -226,7 +291,96 @@ function AdminPage() {
             Search Project
           </button>
         </div>
-      </div>
+{/* Add New User */}
+<div className="admin-card big-card">
+  <h2>Add New User</h2>
+  <input
+    type="text"
+    placeholder="Name"
+    className="big-input"
+    value={newUser.name || ""}
+    onChange={(e) => setNewUser({ ...newUser, name: e.target.value })}
+  />
+  <input
+    type="email"
+    placeholder="Email"
+    className="big-input"
+    value={newUser.email || ""}
+    onChange={(e) => setNewUser({ ...newUser, email: e.target.value })}
+  />
+  <input
+    type="password"
+    placeholder="Password"
+    className="big-input"
+    value={newUser.password || ""}
+    onChange={(e) => setNewUser({ ...newUser, password: e.target.value })}
+  />
+  <input
+    type="text"
+    placeholder="Role"
+    className="big-input"
+    value={newUser.role || ""}
+    onChange={(e) => setNewUser({ ...newUser, role: e.target.value })}
+  />
+  <button className="btn big-btn" onClick={handleAddUser}>
+    Add User
+  </button>
+</div>
+
+{/* Add New Project */}
+<div className="admin-card big-card">
+  <h2>Add New Project</h2>
+  <input 
+    type="text" 
+    placeholder="Project Name" 
+    className="big-input" 
+    value={newProject.project_name || ""} 
+    onChange={(e) => setNewProject({ ...newProject, project_name: e.target.value })}
+  />
+  <textarea 
+    placeholder="Project Description" 
+    className="big-input"
+    value={newProject.project_description || ""}
+    onChange={(e) => setNewProject({ ...newProject, project_description: e.target.value })}
+  />
+  <button className="btn big-btn" onClick={handleAddProject}>Add Project</button>
+</div>
+
+
+{/* Add New Task */}
+<div className="admin-card big-card">
+  <h2>Add New Task</h2>
+
+  <input 
+    type="text" 
+    placeholder="Task Title" 
+    className="big-input" 
+    value={newTask.taskName || ""} 
+    onChange={(e) => setNewTask({ ...newTask, taskName: e.target.value })}
+  />
+
+  <textarea 
+    placeholder="Task Description" 
+    className="big-input"
+    value={newTask.taskDescription || ""} 
+    onChange={(e) => setNewTask({ ...newTask, taskDescription: e.target.value })}
+  />
+
+  <input 
+    type="text" 
+    placeholder="Assign to Project ID" 
+    className="big-input" 
+    value={newTask.projectId || ""} 
+    onChange={(e) => setNewTask({ ...newTask, projectId: e.target.value })}
+  />
+
+  <button className="btn big-btn" onClick={handleAddTask}>
+    Add Task
+  </button>
+</div>
+
+</div>
+
     </>
   );
 }

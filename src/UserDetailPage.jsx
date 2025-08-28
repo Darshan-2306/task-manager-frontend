@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Headder from "./Headder";
+import { useNavigate } from "react-router-dom";
 
 function UserDetailPage() {
   const { id } = useParams(); // user id from URL
@@ -9,6 +10,8 @@ function UserDetailPage() {
   const [editUser, setEditUser] = useState({});
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const navigate = useNavigate();
+
 
   // fetch user
   useEffect(() => {
@@ -66,30 +69,62 @@ function UserDetailPage() {
   }, [id]);
 
   // handle input changes in edit mode
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setEditUser({ ...editUser, [name]: value });
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setEditUser((prev) => ({
+            ...prev,          
+            [name]: value,    
+            password: null  
+        }));
+
   };
 
   // save edited user
-  const handleSave = async () => {
-    try {
-      const res = await fetch(`http://localhost:8081/user/admin/updateUser/${id}`, {
-        method: "PUT",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify(editUser),
-      });
-      if (!res.ok) throw new Error("Update failed");
 
-      const updated = await res.json();
-      setUser(updated);
-      setIsEditing(false);
-    } catch (err) {
-      console.error(err);
-      alert("Error updating user");
+const handleSave = async () => {
+  try {
+   
+    const updatedUser = { ...editUser, password: null };
+
+    const res = await fetch(`http://localhost:8081/user/admin/updateUser/${id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify(updatedUser),
+    });
+
+    if (!res.ok) throw new Error("Update failed");
+
+    const updated = await res.json();
+    setUser(updated);
+    setIsEditing(false);
+  } catch (err) {
+    console.error(err);
+    alert("Error updating user");
+  }
+};
+
+ // remove user
+  const RemoveUser = async() =>{
+    try{
+    const res = await fetch(`http://localhost:8081/user/admin/deleteUser/${id}`, {
+        method: "DELETE",
+        credentials: "include"
+    });
+
+      if (res.ok) {
+        const deletedUser = await res.json();
+        alert(`User ${deletedUser.name} removed successfully`);
+        navigate("/AdminPage");
+        } else {
+        throw new Error("Unsuccessful delete");
+        }
+
     }
-  };
+
+    catch(err){
+        alert(err);
+    }  };
 
   if (!user) return <p>Loading...</p>;
 
@@ -137,6 +172,11 @@ function UserDetailPage() {
             <p><b>Email:</b> {user.email}</p>
             <p><b>Role:</b> {user.role}</p>
             <button onClick={() => setIsEditing(true)}>Edit</button>
+            <br>
+            </br>
+            <br>
+            </br>
+            <button onClick={RemoveUser} style={{backgroundColor: "red" }}>Remove</button>
           </>
         )}
       </div>

@@ -29,7 +29,8 @@ function Signup(){
       if (response.ok) {
         navigate("/"); 
         window.location.reload();
-      } else {
+      } 
+      else {
         setMessage(data);
       }
     } 
