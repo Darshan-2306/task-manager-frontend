@@ -2,7 +2,7 @@ body {
   color-scheme: light dark;
   font-family: 'Times New Roman', Times, serif;
   font-size: larger;
-  background-color: #1e1c1c; 
+ background-color: #232323;
 }
 
 .login-container {
@@ -14,12 +14,12 @@ body {
 }
 
 .headder{
-    color:rgb(200, 195, 195);
+    color: #2d3748;
 }
 .login-form {
     /* font-size: larger; */
-  background-color: #686868; 
-  padding: 40px 30px;
+  background: #c4c4c4;
+  padding: 20px 30px;
   border-radius: 10px;
   box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
   width: 300px;
@@ -60,7 +60,16 @@ button {
   color: white;
 }
 
+.submit-btn:hover{
+  background-color: #317334;
+}
+
+
 .signup-btn {
   background-color: #2196F3;
   color: white;
+}
+
+.signup-btn:hover {
+  background-color: #0b7dda;
 }

@@ -53,7 +53,7 @@ function Login() {
       <div className="login-container">
         <center>
           <div className="login-form">
-            <h2 className="headder">Login Page</h2>
+            <h2 className="headder">Login </h2>
             <form onSubmit={handleLogin}>
               <div className="form-group">
                 <label>Email</label>

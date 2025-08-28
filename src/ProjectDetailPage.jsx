@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Headder from "./Headder";
-
+import './ProjectDetail.css';
 function ProjectDetailPage() {
   const { id } = useParams(); 
   const navigate = useNavigate();
@@ -116,6 +116,7 @@ function ProjectDetailPage() {
   };
 
 const handleAssignTask = async () => {
+    const { projectId } = useParams();
   try {
     if (!assignment.taskId || !assignment.userId) {
       alert("Please enter both Task ID and User ID");
@@ -126,17 +127,33 @@ const handleAssignTask = async () => {
       userId: parseInt(assignment.userId)
     };
 
- 
+    const projectAssignment ={
+        taskId: parseInt(assignment.taskId),
+        nubprojectId : parseInt(projectId)
+    };
+
+
+
     const resTask = await fetch(`http://localhost:8081/task_User/admin/add`, {
       method: "POST",
       headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       credentials: "include",
       body: JSON.stringify(taskAssignment),
+
     });
     if (!resTask.ok) throw new Error("Failed to assign task");
     const dataTask = await resTask.json();
 
-  } catch (err) {
+    // const resProj = await fetch(`http://localhost:8081/project_user/admin/add`,{
+    //     method :"Post",
+    //     headers:{"Content-Type": "application/json", Authorization: `Bearer ${token}`},
+    //     credentials: "include",
+    //     body: JSON.stringify(projectAssignment)
+    // });
+    // resProj;
+  }
+  
+  catch (err) {
     console.error(err);
     alert("Error assigning task/project: " + err.message);
   }
@@ -146,73 +163,81 @@ const handleAssignTask = async () => {
   if (!project) return <p>Loading...</p>;
 
   return (
-    <>
+       <>
       <Headder />
-      <div className="item-card">
-        <h2>Project Details - ID: {project.project_id}</h2>
+      <div className="project-detail-page">
+        <div className="project-cards-container">
+          {/* Project Details Card */}
+          <div className="Projectdetail-card">
+            <h2>Project Details - ID: {project.project_id}</h2>
 
-        {isEditing ? (
-          <>
-            <div>
-              <label>Title:</label>
-              <input type="text" name="project_name" value={editProject.project_name} onChange={handleInputChange} />
-            </div>
-            <div>
-              <label>Description:</label>
-              <textarea name="project_description" value={editProject.project_description} onChange={handleInputChange} />
-            </div>
-            <button onClick={handleSave}>Save</button>
-            <button onClick={() => setIsEditing(false)}>Cancel</button>
-          </>
-        ) : (
-          <>
-            <p><b>Title:</b> {project.project_name}</p>
-            <p><b>Description:</b> {project.project_description}</p>
-            <button onClick={() => setIsEditing(true)}>Edit</button>
-            <br /><br />
-            <button onClick={RemoveProject}>Delete Project</button>
-          </>
-        )}
+            {isEditing ? (
+              <>
+                <div>
+                  <label>Title:</label>
+                  <input type="text" name="project_name" value={editProject.project_name} onChange={handleInputChange} />
+                </div>
+                <div>
+                  <label>Description:</label>
+                  <textarea name="project_description" value={editProject.project_description} onChange={handleInputChange} />
+                </div>
+                <div className="button-group">
+                  <button onClick={handleSave}>Save</button>
+                  <button onClick={() => setIsEditing(false)}>Cancel</button>
+                </div>
+              </>
+            ) : (
+              <>
+                <p><b>Title:</b> {project.project_name}</p>
+                <p><b>Description:</b> {project.project_description}</p>
+                <div className="button-group">
+                  <button onClick={() => setIsEditing(true)}>Edit</button>
+                  <button onClick={RemoveProject}>Delete Project</button>
+                </div>
+              </>
+            )}
 
-        <hr />
-        <h3>Tasks in this Project</h3>
-        {tasks.length > 0 ? (
-          <ul>
-            {tasks.map((task, index) => (
-              <li key={task.task_id || index}><b>{task.taskName}</b></li>
-            ))}
-          </ul>
-        ) : <p>No tasks found for this project.</p>}
+            <hr />
+            <h3>Tasks in this Project</h3>
+            {tasks.length > 0 ? (
+              <ul>
+                {tasks.map((task, index) => (
+                  <li key={task.task_id || index}><b>{task.taskName}</b></li>
+                ))}
+              </ul>
+            ) : <p>No tasks found for this project.</p>}
 
-        <hr />
-        <h3>Users working in this Project</h3>
-        {users.length > 0 ? (
-          <ul>
-            {users.map((user, index) => (
-              <li key={user.id || index}>{user.name} ({user.email})</li>
-            ))}
-          </ul>
-        ) : <p>No users assigned to this project.</p>}
-      </div>
+            <hr />
+            <h3>Users working in this Project</h3>
+            {users.length > 0 ? (
+              <ul>
+                {users.map((user, index) => (
+                  <li key={user.id || index}>{user.name} ({user.email})</li>
+                ))}
+              </ul>
+            ) : <p>No users assigned to this project.</p>}
+          </div>
 
-    
-      <div className="assign-card big-card">
-        <h2>Assign Task to User</h2>
-        <input
-          type="text"
-          placeholder="Task ID"
-          className="big-input"
-          value={assignment.taskId}
-          onChange={(e) => setAssignment({ ...assignment, taskId: e.target.value })}
-        />
-        <input
-          type="text"
-          placeholder="User ID"
-          className="big-input"
-          value={assignment.userId}
-          onChange={(e) => setAssignment({ ...assignment, userId: e.target.value })}
-        />
-        <button className="btn big-btn" onClick={handleAssignTask}>Assign Task</button>
+          {/* Assign Task Card */}
+          <div className="project_assign">
+            <h2>Assign Task to User</h2>
+            <input
+              type="text"
+              placeholder="Task ID"
+              className="big-input"
+              value={assignment.taskId}
+              onChange={(e) => setAssignment({ ...assignment, taskId: e.target.value })}
+            />
+            <input
+              type="text"
+              placeholder="User ID"
+              className="big-input"
+              value={assignment.userId}
+              onChange={(e) => setAssignment({ ...assignment, userId: e.target.value })}
+            />
+            <button className="btn big-btn" onClick={handleAssignTask}>Assign Task</button>
+          </div>
+        </div>
       </div>
     </>
   );

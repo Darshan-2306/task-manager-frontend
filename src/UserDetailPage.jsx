@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import Headder from "./Headder";
 import { useNavigate } from "react-router-dom";
+import './UserDetailPage.css';
 
 function UserDetailPage() {
   const { id } = useParams(); // user id from URL
@@ -129,84 +130,98 @@ const handleSave = async () => {
   if (!user) return <p>Loading...</p>;
 
   return (
-    <>
+     <>
       <Headder />
-      <div className="item-card">
-        <h2>User Details - ID: {user.id}</h2>
+      <div className="user-detail-page">
+        {/* User Details Card (full width) */}
+        <center>
+        <div className="user-details-card">
+          <h2>User Details - ID: {user.id}</h2>
 
-        {isEditing ? (
-          <>
-            <p>
-              <b>Name:</b>{" "}
-              <input
-                type="text"
-                name="name"
-                value={editUser.name}
-                onChange={handleChange}
-              />
-            </p>
-            <p>
-              <b>Email:</b>{" "}
-              <input
-                type="email"
-                name="email"
-                value={editUser.email}
-                onChange={handleChange}
-              />
-            </p>
-            <p>
-              <b>Role:</b>{" "}
-              <input
-                type="text"
-                name="role"
-                value={editUser.role}
-                onChange={handleChange}
-              />
-            </p>
-            <button onClick={handleSave}>Save</button>
-            <button onClick={() => setIsEditing(false)}>Cancel</button>
-          </>
-        ) : (
-          <>
-            <p><b>Name:</b> {user.name}</p>
-            <p><b>Email:</b> {user.email}</p>
-            <p><b>Role:</b> {user.role}</p>
-            <button onClick={() => setIsEditing(true)}>Edit</button>
-            <br>
-            </br>
-            <br>
-            </br>
-            <button onClick={RemoveUser} style={{backgroundColor: "red" }}>Remove</button>
-          </>
-        )}
-      </div>
+          {isEditing ? (
+            <>
+              <p>
+                <b>Name:</b>{" "}
+                <input
+                  type="text"
+                  name="name"
+                  value={editUser.name}
+                  onChange={handleChange}
+                />
+              </p>
+              <p>
+                <b>Email:</b>{" "}
+                <input
+                  type="email"
+                  name="email"
+                  value={editUser.email}
+                  onChange={handleChange}
+                />
+              </p>
+              <p>
+                <b>Role:</b>{" "}
+                <input
+                  type="text"
+                  name="role"
+                  value={editUser.role}
+                  onChange={handleChange}
+                />
+              </p>
+              <div className="button-group">
+                <button className="save-btn" onClick={handleSave}>Save</button>
+                <button className="cancel-btn" onClick={() => setIsEditing(false)}>Cancel</button>
+              </div>
+            </>
+          ) : (
+            <>
+              <p><b>Name:</b> {user.name}</p>
+              <p><b>Email:</b> {user.email}</p>
+              <p><b>Role:</b> {user.role}</p>
+         
+              <div className="button-group">
+                
+                <button className="edit-btn" onClick={() => setIsEditing(true)}>Edit</button>
+                <button className="remove-btn" onClick={RemoveUser}>Remove User</button>
+               
+              </div>
+           
+            </>
+          )}
+        </div>
+        </center>
 
-      {/* Projects Module */}
-      <div className="item-card">
-        <h2>Projects Assigned</h2>
-        {projects.length > 0 ? (
-          <ul>
-            {projects.map((p , index) => (
-              <li key={p.id || index}>{p.project_name}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No projects assigned</p>
-        )}
-      </div>
+        {/* Projects and Tasks side by side */}
+        <div className="data-cards-container">
+          {/* Projects Card */}
+          <div className="data-card">
+            <h2>Projects Assigned</h2>
+            <div className=".list-container">
+            {projects.length > 0 ? (
+              <ul>
+                {projects.map((p, index) => (
+                  <li key={p.id || index}>{p.project_name}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No projects assigned</p>
+            )}
+          </div>
+          </div>
 
-      {/* Tasks Module */}
-      <div className="item-card">
-        <h2>Tasks Assigned</h2>
-        {tasks.length > 0 ? (
-          <ul>
-            {tasks.map((t , index) => (
-              <li key={t.id || index}>{t.taskName}</li>
-            ))}
-          </ul>
-        ) : (
-          <p>No tasks assigned</p>
-        )}
+          {/* Tasks Card */}
+          <div className="data-card">
+            <h2>Tasks Assigned</h2>
+            {tasks.length > 0 ? (
+              <ul>
+                {tasks.map((t, index) => (
+                  <li key={t.id || index}>{t.taskName}</li>
+                ))}
+              </ul>
+            ) : (
+              <p>No tasks assigned</p>
+            )}
+          </div>
+        </div>
       </div>
     </>
   );
