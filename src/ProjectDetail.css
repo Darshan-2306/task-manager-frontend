@@ -1,187 +1,346 @@
-/* ProjectDetail.css */
-body {
-  color-scheme: light dark;
-  font-family: 'Times New Roman', Times, serif;
-  font-size: larger;
-  background-color: #232323;
-  color: #2d3748;
-  margin: 0;
-  padding: 0;
-}
-
-
 .project-detail-page {
   padding: 20px;
-  max-width: 1200px;
-  margin: 0 auto;
+  background-color: #1a202c;
+  min-height: 100vh;
+  color: white;
+  font-size: 16px;
 }
 
+.project-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.project-header h1 {
+  color: white;
+  margin: 0;
+  font-size: 32px;
+}
+
+.back-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.back-button:hover {
+  background-color: #4338ca;
+}
 
 .project-cards-container {
   display: flex;
   gap: 20px;
-  justify-content: center;
-  flex-wrap: wrap;
+  padding: 0 20px;
 }
 
+.left-column, .right-column {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+}
 
-.Projectdetail-card, .project_assign {
-  background: white;
-  padding: 20px;
+.project-detail-card, .users-card, .tasks-card, .create-task-card {
+  background: rgb(73, 72, 72);
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
-  width: 48%;
-  min-width: 400px;
-  box-sizing: border-box;
+  padding: 20px;
 }
 
-.Projectdetail-card h2, .project_assign h2 {
+.project-detail-card h2, .users-card h2, .tasks-card h2, .create-task-card h2 {
   margin-top: 0;
-  color: #2d3748;
+  color: white;
+  border-bottom: 1px solid #eee;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 15px;
-  font-size: 1.4rem;
-  text-align: center;
+  font-size: 24px;
 }
 
-.Projectdetail-card h3 {
-  color: #2d3748;
-  margin-top: 20px;
-  padding-bottom: 8px;
-  border-bottom: 1px solid #e2e8f0;
-  font-size: 1.2rem;
-}
-
-.Projectdetail-card p {
-  margin: 10px 0;
+.project-id {
+  color: #cbcdce;
   font-size: 16px;
+  margin-bottom: 15px;
 }
 
-.Projectdetail-card b {
-  color: #2d3748;
+.form-group {
+  margin-bottom: 15px;
 }
 
-.Projectdetail-card input, .Projectdetail-card textarea {
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background-color: white;
-  color: #2d3748;
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 12px;
-}
-
-.Projectdetail-card textarea {
-  min-height: 80px;
-  resize: vertical;
-}
-
-.Projectdetail-card label {
+.form-group label {
   display: block;
   margin-bottom: 5px;
   font-weight: bold;
-  color: #2d3748;
+  color: white;
   font-size: 16px;
 }
 
-.Projectdetail-card hr {
-  border: 0;
-  height: 1px;
-  background: #e2e8f0;
-  margin: 20px 0;
-}
-
-.Projectdetail-card ul {
-  list-style-type: none;
-  padding: 0;
-  margin: 10px 0;
-}
-
-.Projectdetail-card li {
-  background-color: #cbcdce;
-  padding: 10px 12px;
-  border-radius: 8px;
-  margin-bottom: 8px;
-  color: #2d3748;
-}
-
-/* Assign Task Card specific styles */
-.project_assign {
-  display: flex;
-  flex-direction: column;
-  height: 50%;
-}
-
-.project_assign h2 {
-  text-align: center;
-}
-
-.big-input {
+.form-group input, .form-group textarea, .form-group select {
+  width: 100%;
   padding: 10px;
-  margin-bottom: 15px;
-  
-  width: 100%;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
   background-color: white;
-  color: #2d3748;
-  font-size: 1rem;
-  box-sizing: border-box;
+  font-size: 16px;
+  color: black;
 }
 
-/* Buttons */
-button {
-  padding: 10px 15px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  margin-right: 10px;
-  margin-top: 10px;
-  transition: opacity 0.3s;
+.form-group textarea {
+  min-height: 100px;
+  resize: vertical;
 }
-
-button:hover {
-  opacity: 0.9;
-}
-
-.btn {
-  background: #6366f1;
-  color: white;
-}
-
-.big-btn {
-  padding: 12px;
-  background: #4f46e5;
-  color: white;
-  width: 100%;
-  margin-top: 15px;
-}
-
-.Projectdetail-card button:first-of-type {
-  background: #10b981;
-  color: white;
-}
-
-.Projectdetail-card button:nth-of-type(2) {
-  background: #9ca3af;
-  color: white;
-}
-
-.Projectdetail-card button:last-of-type {
-  background: #f44336;
-  color: white;
-}
-
 
 .button-group {
   display: flex;
   gap: 10px;
   margin-top: 15px;
-  flex-wrap: wrap;
 }
 
+.edit-btn, .save-btn, .cancel-btn, .delete-btn, .create-btn, .assign-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.edit-btn {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #4338ca;
+}
+
+.save-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #059669;
+}
+
+.cancel-btn {
+  background-color: #6b7280;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #4b5563;
+}
+
+.delete-btn {
+  background-color: #ef4444;
+  color: white;
+}
+
+.delete-btn:hover {
+  background-color: #dc2626;
+}
+
+.create-btn {
+  background-color: #8b5cf6;
+  color: white;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.create-btn:hover {
+  background-color: #7c3aed;
+}
+
+.assign-btn {
+  background-color: #10b981;
+  color: white;
+  width: 100%;
+  margin-top: 10px;
+}
+
+.assign-btn:hover {
+  background-color: #059669;
+}
+
+.scrollable-list {
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.user-item, .task-item {
+  padding: 10px;
+  border-bottom: 1px solid #eee;
+}
+
+.user-item:last-child, .task-item:last-child {
+  border-bottom: none;
+}
+
+.user-info {
+  flex: 1;
+}
+
+.user-name {
+  font-weight: bold;
+  margin-bottom: 3px;
+  font-size: 16px;
+  color: white;
+}
+
+.user-email {
+  color: #cbcdce;
+  font-size: 14px;
+}
+
+.task-item {
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.task-item:hover {
+  background-color: #4b5563;
+}
+
+.task-name {
+  font-weight: bold;
+  margin-bottom: 5px;
+  font-size: 16px;
+  color: white;
+}
+
+.task-description {
+  color: #cbcdce;
+  font-size: 14px;
+  margin-bottom: 5px;
+}
+
+.no-data {
+  color: #cbcdce;
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
+}
+
+.clickable {
+  cursor: pointer;
+}
+
+/* Modal Styles */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background-color: rgba(0, 0, 0, 0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 1000;
+}
+
+.modal-content {
+  background: rgb(73, 72, 72);
+  border-radius: 8px;
+  width: 90%;
+  max-width: 500px;
+  max-height: 90vh;
+  overflow-y: auto;
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+}
+
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 20px;
+  border-bottom: 1px solid #eee;
+}
+
+.modal-header h2 {
+  margin: 0;
+  color: white;
+  font-size: 24px;
+}
+
+.close-btn {
+  background: none;
+  border: none;
+  font-size: 24px;
+  cursor: pointer;
+  color: #cbcdce;
+}
+
+.close-btn:hover {
+  color: white;
+}
+
+.modal-body {
+  padding: 20px;
+}
+
+.task-detail {
+  margin-bottom: 20px;
+}
+
+.task-detail h3 {
+  margin-top: 0;
+  color: #4f46e5;
+  font-size: 20px;
+}
+
+.task-detail p {
+  font-size: 16px;
+  color: white;
+}
+
+.task-detail strong {
+  color: #cbcdce;
+}
+
+.assign-user-section {
+  border-top: 1px solid #eee;
+  padding-top: 20px;
+}
+
+.assign-user-section h3 {
+  margin-top: 0;
+  font-size: 18px;
+  color: white;
+}
+
+.assign-user-section select {
+  width: 100%;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  color: black;
+  font-size: 16px;
+  margin-bottom: 10px;
+}
+
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #cbcdce;
+}
+
+@media (max-width: 768px) {
+  .project-cards-container {
+    flex-direction: column;
+  }
+  
+  .project-header {
+    flex-direction: column;
+    gap: 10px;
+    align-items: flex-start;
+  }
+}

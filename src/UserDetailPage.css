@@ -1,149 +1,193 @@
-/* UserDetailPage.css - Option 1 */
-body {
-  color-scheme: light dark;
-  font-family: 'Times New Roman', Times, serif;
-  font-size: larger;
-  background-color: #232323;
-  color: #2d3748;
-  margin: 0;
-  padding: 0;
-}
-
 .user-detail-page {
   padding: 20px;
-  max-width: 1000px;
-  margin: 0 auto;
+  background-color: #1a202c;
+  min-height: 100vh;
+  color: white;
+  font-size: 16px;
 }
 
-/* User details card (full width) */
-.user-details-card {
-  background: white;
-  padding: 25px;
+.user-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 0 20px;
+}
+
+.user-header h1 {
+  color: white;
+  margin: 0;
+  font-size: 32px;
+}
+
+.back-button {
+  background-color: #4f46e5;
+  color: white;
+  border: none;
+  padding: 8px 12px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+}
+
+.back-button:hover {
+  background-color: #4338ca;
+}
+
+.user-content {
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  padding: 0 20px;
+}
+
+.user-details-card, .data-card {
+  background: rgb(73, 72, 72);
   border-radius: 8px;
   box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
   border: 1px solid #e2e8f0;
-  margin-bottom: 20px;
-  width: 75%;
+  padding: 20px;
 }
 
-.user-details-card h2 {
+.user-details-card h2, .data-card h2 {
   margin-top: 0;
-  color: #2d3748;
+  color: white;
+  border-bottom: 1px solid #eee;
   padding-bottom: 10px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 20px;
-  text-align: center;
+  font-size: 24px;
 }
 
-/* Projects and tasks side by side */
+.user-id {
+  color: #cbcdce;
+  font-size: 16px;
+  margin-bottom: 15px;
+}
+
+.edit-form {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.form-group {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.form-group label {
+  font-weight: bold;
+  color: white;
+  font-size: 16px;
+}
+
+.form-group input {
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid #ccc;
+  background-color: white;
+  font-size: 16px;
+  color: black;
+}
+
+.user-info p {
+  margin: 10px 0;
+  font-size: 16px;
+  color: white;
+}
+
+.user-info b {
+  color: #cbcdce;
+}
+
+.button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 15px;
+}
+
+.edit-btn, .save-btn, .cancel-btn, .remove-btn {
+  padding: 10px 15px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+}
+
+.edit-btn {
+  background-color: #4f46e5;
+  color: white;
+}
+
+.edit-btn:hover {
+  background-color: #4338ca;
+}
+
+.save-btn {
+  background-color: #10b981;
+  color: white;
+}
+
+.save-btn:hover {
+  background-color: #059669;
+}
+
+.cancel-btn {
+  background-color: #6b7280;
+  color: white;
+}
+
+.cancel-btn:hover {
+  background-color: #4b5563;
+}
+
+.remove-btn {
+  background-color: #ef4444;
+  color: white;
+}
+
+.remove-btn:hover {
+  background-color: #dc2626;
+}
+
 .data-cards-container {
   display: flex;
   gap: 20px;
 }
 
 .data-card {
-  background: white;
-  padding: 20px;
-  border-radius: 8px;
-  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
-  border: 1px solid #e2e8f0;
   flex: 1;
-  min-width: 300px;
 }
 
-.data-card h2 {
-  margin-top: 0;
-  color: #323c4d;
-  padding-bottom: 10px;
-  border-bottom: 1px solid #e2e8f0;
-  margin-bottom: 15px;
-  font-size: 1.3rem;
-  text-align: center;
-  
-} 
-
-/* Form elements */
-.user-details-card p {
-  margin: 15px 0;
-  font-size: 20px;
-}
-
-.user-details-card b {
-  color: #2d3748;
-}
-
-.user-details-card input {
-  padding: 8px;
-  font-size: 14px;
-  border: 1px solid #d1d5db;
-  border-radius: 6px;
-  background-color: white;
-  color: #2d3748;
-  width: 100%;
-  box-sizing: border-box;
-  margin-bottom: 12px;
-}
-
-.data-card {
-  max-height: 200px;
+.scrollable-list {
+  max-height: 300px;
   overflow-y: auto;
 }
 
-/* Lists */
-.data-card ul {
-  list-style-type: none;
-  padding: 10px;
-  margin: 10px 0;
-}
-
-.data-card li {
+.list-item {
   background-color: #cbcdce;
-  padding: 10px 12px;
+  padding: 12px 15px;
   border-radius: 8px;
-  margin-bottom: 8px;
-  color: #2d3748;
+  margin-bottom: 10px;
+  color: black;
+  transition: all 0.2s ease;
 }
 
-/* Buttons */
-.button-group {
-  display: flex;
-  gap: 10px;
-  margin-top: 20px;
-  flex-wrap: wrap;
+.list-item:hover {
+  background-color: #a1a1a1;
+  transform: translateX(5px);
 }
 
-.user-detail-page button {
-  width: 250px;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-  transition: opacity 0.3s;
-  margin-left: 80px;
-  
+.no-data {
+  color: #cbcdce;
+  text-align: center;
+  padding: 20px;
+  font-size: 16px;
 }
 
-button:hover {
-  opacity: 0.9;
+.loading {
+  text-align: center;
+  padding: 40px;
+  font-size: 18px;
+  color: #cbcdce;
 }
-
-.edit-btn {
-  background: #10b981;
-  color: white;
-}
-
-.save-btn {
-  background: #10b981;
-  color: white;
-}
-
-.cancel-btn {
-  background: #9ca3af;
-  color: white;
-}
-
-.remove-btn {
-  background: #f44336;
-  color: white;
-}
-

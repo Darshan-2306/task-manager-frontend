@@ -2,19 +2,25 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import Headder from "./Headder";
 import './ProjectDetail.css';
+
 function ProjectDetailPage() {
   const { id } = useParams(); 
   const navigate = useNavigate();
   const [project, setProject] = useState(null);
   const [tasks, setTasks] = useState([]);
   const [users, setUsers] = useState([]);
+  const [allUsers, setAllUsers] = useState([]);
   const [isEditing, setIsEditing] = useState(false);
   const [editProject, setEditProject] = useState({});
-  const [assignment, setAssignment] = useState({ taskId: "", userId: "" });
-
-
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [showTaskModal, setShowTaskModal] = useState(false);
+  const [taskAssignment, setTaskAssignment] = useState({ userId: "" });
+  const [newTask, setNewTask] = useState({
+    taskName: "",
+    taskDescription: "",
+    projectId: id
+  });
   const token = localStorage.getItem("token");
-
 
   useEffect(() => {
     const fetchProject = async () => {
@@ -64,15 +70,37 @@ function ProjectDetailPage() {
       }
     };
 
+    const fetchAllUsers = async () => {
+      try {
+        const res = await fetch("http://localhost:8081/user/admin/getAllUser", {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
+        });
+        if (!res.ok) throw new Error("Failed to fetch users");
+        const data = await res.json();
+        setAllUsers(data);
+      } catch (err) {
+        console.error(err);
+      }
+    };
+
     fetchProject();
     fetchTasks();
     fetchUsers();
+    fetchAllUsers();
   }, [id, token]);
 
   // Edit project input handler
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setEditProject({ ...editProject, [name]: value });
+  };
+
+  // Handle new task input change
+  const handleNewTaskChange = (e) => {
+    const { name, value } = e.target;
+    setNewTask({ ...newTask, [name]: value });
   };
 
   // Save edited project
@@ -89,6 +117,7 @@ function ProjectDetailPage() {
       const updated = await res.json();
       setProject(updated);
       setIsEditing(false);
+      alert("Project updated successfully");
     } catch (err) {
       console.error(err);
       alert("Error updating project: " + err.message);
@@ -97,147 +126,278 @@ function ProjectDetailPage() {
 
   // Delete project
   const RemoveProject = async () => {
-    try {
-      const res = await fetch(`http://localhost:8081/project/admin/deleteProject/${id}`, {
-        method: "DELETE",
-        credentials: "include",
-      });
+    if (window.confirm("Are you sure you want to delete this project?")) {
+      try {
+        const res = await fetch(`http://localhost:8081/project/admin/deleteProject/${id}`, {
+          method: "DELETE",
+          credentials: "include",
+        });
 
-      if (res.ok) {
-        alert("Project removed successfully");
-        navigate("/AdminPage");
-      } else {
-        throw new Error("Unsuccessful delete");
+        if (res.ok) {
+          alert("Project removed successfully");
+          navigate("/AdminPage");
+        } else {
+          throw new Error("Unsuccessful delete");
+        }
+      } catch (err) {
+        console.error(err);
+        alert(err);
       }
-    } catch (err) {
-      console.error(err);
-      alert(err);
     }
   };
 
-const handleAssignTask = async () => {
-    const { projectId } = useParams();
-  try {
-    if (!assignment.taskId || !assignment.userId) {
-      alert("Please enter both Task ID and User ID");
+  // Create new task
+  const handleCreateTask = async () => {
+    if (!newTask.taskName || !newTask.taskDescription) {
+      alert("Please fill all fields to create a task");
       return;
     }
-    const taskAssignment = {
-      taskId: parseInt(assignment.taskId),
-      userId: parseInt(assignment.userId)
-    };
 
-    const projectAssignment ={
-        taskId: parseInt(assignment.taskId),
-        nubprojectId : parseInt(projectId)
-    };
+    try {
+      const res = await fetch("http://localhost:8081/task/admin/addTask", {
+        method: "POST",
+        headers: { 
+          "Content-Type": "application/json", 
+          Authorization: `Bearer ${token}` 
+        },
+        credentials: "include",
+        body: JSON.stringify(newTask),
+      });
 
+      const result = await res.text();
+      
+      if (res.ok && result === "success") {
+        alert("Task created successfully");
+        setNewTask({ taskName: "", taskDescription: "", projectId: id });
+        
+        // Refresh tasks list
+        const tasksRes = await fetch(`http://localhost:8081/task/admin/getTaskByProjectId/${id}`, {
+          method: "GET",
+          headers: { Authorization: `Bearer ${token}` },
+          credentials: "include",
+        });
+        
+        if (tasksRes.ok) {
+          const tasksData = await tasksRes.json();
+          setTasks(tasksData);
+        }
+      } else {
+        throw new Error(result || "Failed to create task");
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error creating task: " + err.message);
+    }
+  };
 
+  const handleTaskClick = (task) => {
+    setSelectedTask(task);
+    setShowTaskModal(true);
+  };
 
-    const resTask = await fetch(`http://localhost:8081/task_User/admin/add`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      credentials: "include",
-      body: JSON.stringify(taskAssignment),
+  const handleAssignUserToTask = async () => {
+    if (!taskAssignment.userId) {
+      alert("Please select a user");
+      return;
+    }
+    
+    try {
+      const assignmentData = {
+        taskId: selectedTask.task_id,
+        userId: parseInt(taskAssignment.userId)
+      };
 
-    });
-    if (!resTask.ok) throw new Error("Failed to assign task");
-    const dataTask = await resTask.json();
+      const res = await fetch(`http://localhost:8081/task_User/admin/add`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        credentials: "include",
+        body: JSON.stringify(assignmentData),
+      });
+      
+      if (!res.ok) throw new Error("Failed to assign user to task");
+      
+      alert("User assigned to task successfully");
+      setTaskAssignment({ userId: "" });
+      setShowTaskModal(false);
+      
+      // Refresh users list
+      const usersRes = await fetch(`http://localhost:8081/project_user/admin/UserDetail/${id}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      
+      if (usersRes.ok) {
+        const usersData = await usersRes.json();
+        setUsers(usersData);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error assigning user to task: " + err.message);
+    }
+  };
 
-    // const resProj = await fetch(`http://localhost:8081/project_user/admin/add`,{
-    //     method :"Post",
-    //     headers:{"Content-Type": "application/json", Authorization: `Bearer ${token}`},
-    //     credentials: "include",
-    //     body: JSON.stringify(projectAssignment)
-    // });
-    // resProj;
-  }
-  
-  catch (err) {
-    console.error(err);
-    alert("Error assigning task/project: " + err.message);
-  }
-};
-
-
-  if (!project) return <p>Loading...</p>;
+  if (!project) return <div className="loading">Loading...</div>;
 
   return (
-       <>
+    <>
       <Headder />
       <div className="project-detail-page">
+        <div className="project-header">
+          <h1>Project Details</h1>
+          <button className="back-button" onClick={() => navigate("/AdminPage")}>
+            Back to Dashboard
+          </button>
+        </div>
+
         <div className="project-cards-container">
-          {/* Project Details Card */}
-          <div className="Projectdetail-card">
-            <h2>Project Details - ID: {project.project_id}</h2>
+          {/* Left Column - Project Details and Users */}
+          <div className="left-column">
+            {/* Project Details Card */}
+            <div className="project-detail-card">
+              <h2>Project Information</h2>
+              <div className="project-id">ID: {project.project_id}</div>
 
-            {isEditing ? (
-              <>
-                <div>
-                  <label>Title:</label>
-                  <input type="text" name="project_name" value={editProject.project_name} onChange={handleInputChange} />
+              {isEditing ? (
+                <div className="edit-form">
+                  <div className="form-group">
+                    <label>Title:</label>
+                    <input 
+                      type="text" 
+                      name="project_name" 
+                      value={editProject.project_name} 
+                      onChange={handleInputChange} 
+                    />
+                  </div>
+                  <div className="form-group">
+                    <label>Description:</label>
+                    <textarea 
+                      name="project_description" 
+                      value={editProject.project_description} 
+                      onChange={handleInputChange} 
+                    />
+                  </div>
+                  <div className="button-group">
+                    <button className="save-btn" onClick={handleSave}>Save</button>
+                    <button className="cancel-btn" onClick={() => setIsEditing(false)}>Cancel</button>
+                  </div>
                 </div>
-                <div>
-                  <label>Description:</label>
-                  <textarea name="project_description" value={editProject.project_description} onChange={handleInputChange} />
+              ) : (
+                <div className="project-info">
+                  <p className="project-title">{project.project_name}</p>
+                  <p className="project-description">{project.project_description}</p>
+                  <div className="button-group">
+                    <button className="edit-btn" onClick={() => setIsEditing(true)}>Edit</button>
+                    <button className="delete-btn" onClick={RemoveProject}>Delete Project</button>
+                  </div>
                 </div>
-                <div className="button-group">
-                  <button onClick={handleSave}>Save</button>
-                  <button onClick={() => setIsEditing(false)}>Cancel</button>
-                </div>
-              </>
-            ) : (
-              <>
-                <p><b>Title:</b> {project.project_name}</p>
-                <p><b>Description:</b> {project.project_description}</p>
-                <div className="button-group">
-                  <button onClick={() => setIsEditing(true)}>Edit</button>
-                  <button onClick={RemoveProject}>Delete Project</button>
-                </div>
-              </>
-            )}
+              )}
+            </div>
 
-            <hr />
-            <h3>Tasks in this Project</h3>
-            {tasks.length > 0 ? (
-              <ul>
-                {tasks.map((task, index) => (
-                  <li key={task.task_id || index}><b>{task.taskName}</b></li>
-                ))}
-              </ul>
-            ) : <p>No tasks found for this project.</p>}
-
-            <hr />
-            <h3>Users working in this Project</h3>
-            {users.length > 0 ? (
-              <ul>
-                {users.map((user, index) => (
-                  <li key={user.id || index}>{user.name} ({user.email})</li>
-                ))}
-              </ul>
-            ) : <p>No users assigned to this project.</p>}
+            {/* Users Card */}
+            <div className="users-card">
+              <h2>Team Members ({users.length})</h2>
+              <div className="scrollable-list">
+                {users.length > 0 ? (
+                  users.map((user, index) => (
+                    <div key={user.id || index} className="user-item">
+                      <div className="user-info">
+                       
+                        <div className="user-name">{user.id}.    {user.name}</div>
+                        <div className="user-email">{user.email}</div>
+                      </div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-data">No users assigned to this project</p>
+                )}
+              </div>
+            </div>
           </div>
 
-          {/* Assign Task Card */}
-          <div className="project_assign">
-            <h2>Assign Task to User</h2>
-            <input
-              type="text"
-              placeholder="Task ID"
-              className="big-input"
-              value={assignment.taskId}
-              onChange={(e) => setAssignment({ ...assignment, taskId: e.target.value })}
-            />
-            <input
-              type="text"
-              placeholder="User ID"
-              className="big-input"
-              value={assignment.userId}
-              onChange={(e) => setAssignment({ ...assignment, userId: e.target.value })}
-            />
-            <button className="btn big-btn" onClick={handleAssignTask}>Assign Task</button>
+          {/* Right Column - Tasks */}
+          <div className="right-column">
+            <div className="tasks-card">
+              <h2>Project Tasks ({tasks.length})</h2>
+              <div className="scrollable-list">
+                {tasks.length > 0 ? (
+                  tasks.map((task, index) => (
+                    <div 
+                      key={task.task_id || index} 
+                      className="task-item clickable"
+                      onClick={() => handleTaskClick(task)}
+                    >
+                      <div className="task-name">{task.taskName}</div>
+                      <div className="task-description">{task.taskDescription}</div>
+                    </div>
+                  ))
+                ) : (
+                  <p className="no-data">No tasks found for this project</p>
+                )}
+              </div>
+            </div>
+
+            {/* Create New Task Card */}
+            <div className="create-task-card">
+              <h2>Create New Task</h2>
+              <div className="form-group">
+                <input
+                  type="text"
+                  name="taskName"
+                  placeholder="Task Name"
+                  value={newTask.taskName}
+                  onChange={handleNewTaskChange}
+                />
+              </div>
+              <div className="form-group">
+                <textarea
+                  name="taskDescription"
+                  placeholder="Task Description"
+                  value={newTask.taskDescription}
+                  onChange={handleNewTaskChange}
+                />
+              </div>
+              <button className="create-btn" onClick={handleCreateTask}>Create Task</button>
+            </div>
           </div>
         </div>
+
+        {/* Task Detail Modal */}
+        {showTaskModal && selectedTask && (
+          <div className="modal-overlay" onClick={() => setShowTaskModal(false)}>
+            <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+              <div className="modal-header">
+                <h2>Task Details</h2>
+                <button className="close-btn" onClick={() => setShowTaskModal(false)}>×</button>
+              </div>
+              <div className="modal-body">
+                <div className="task-detail">
+                  <h3>{selectedTask.taskName}</h3>
+                  <p><strong>Description:</strong> {selectedTask.taskDescription}</p>
+                  <p><strong>Task ID:</strong> {selectedTask.task_id}</p>
+                </div>
+                
+                <div className="assign-user-section">
+                  <h3>Assign User to this Task</h3>
+                  <select
+                    value={taskAssignment.userId}
+                    onChange={(e) => setTaskAssignment({ userId: e.target.value })}
+                  >
+                    <option value="">Select User</option>
+                    {allUsers.map(user => (
+                      <option key={user.id} value={user.id}>
+                        {user.name} ({user.email})
+                      </option>
+                    ))}
+                  </select>
+                  <button className="assign-btn" onClick={handleAssignUserToTask}>
+                    Assign User
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </>
   );
