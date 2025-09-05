@@ -14,11 +14,12 @@ function ProjectDetailPage() {
   const [editProject, setEditProject] = useState({});
   const [selectedTask, setSelectedTask] = useState(null);
   const [showTaskModal, setShowTaskModal] = useState(false);
-  const [taskAssignment, setTaskAssignment] = useState({ userId: "" });
+  const [taskAssignment, setTaskAssignment] = useState({ userId: ""});
+
   const [newTask, setNewTask] = useState({
     taskName: "",
     taskDescription: "",
-    projectId: id
+    projectId: id,
   });
   const token = localStorage.getItem("token");
 
@@ -128,6 +129,26 @@ function ProjectDetailPage() {
   const RemoveProject = async () => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
+
+        const proj = await fetch(`http://localhost:8081/project_user/admin/deleteByProject`,{
+          method : "DELETE",
+          credentials: "include",
+          headers:{
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({projectId : id})
+        })
+
+       const task = await fetch(`http://localhost:8081/task_User/admin/deleteByProj`,{
+          method : "DELETE",
+          credentials: "include",
+          headers:{
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({projectId : id})
+       })
+
+
         const res = await fetch(`http://localhost:8081/project/admin/deleteProject/${id}`, {
           method: "DELETE",
           credentials: "include",
@@ -203,9 +224,20 @@ function ProjectDetailPage() {
     
     try {
       const assignmentData = {
-        taskId: selectedTask.task_id,
+        taskId: selectedTask.taskId,
         userId: parseInt(taskAssignment.userId)
       };
+
+      const assignproject ={
+        projectId : id,
+        userId: parseInt(taskAssignment.userId)
+      }
+
+       const email ={
+          toId : taskAssignment.userId,
+          subject : "task assigned",
+          body : `you are assigned to a new task id : ${assignmentData.taskId} in project-id : ${assignproject.projectId}`,
+        }
 
       const res = await fetch(`http://localhost:8081/task_User/admin/add`, {
         method: "POST",
@@ -215,6 +247,21 @@ function ProjectDetailPage() {
       });
       
       if (!res.ok) throw new Error("Failed to assign user to task");
+      else{
+        const addproject =  fetch(`http://localhost:8081/project_user/admin/add`,{
+          method:"Post",
+          headers:{"Content-Type": "application/json", Authorization: `Bearer ${token}`},
+          credentials:"include",
+          body: JSON.stringify(assignproject),
+
+        })
+        const sendemail =  fetch(`http://localhost:8081/api/email/send`,{
+          method:"POST",
+          headers:{"Content-Type": "application/json", Authorization: `Bearer ${token}`},
+          credentials:"include",
+          body:JSON.stringify(email),
+        })
+      }
       
       alert("User assigned to task successfully");
       setTaskAssignment({ userId: "" });
@@ -236,6 +283,41 @@ function ProjectDetailPage() {
       alert("Error assigning user to task: " + err.message);
     }
   };
+
+  const deleteTask = async () => {
+
+
+  if (!window.confirm("Are you sure you want to delete this task?")) return;
+
+  try {
+    const res = await fetch("http://localhost:8081/task_User/admin/deleteByTask", {
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      credentials: "include",
+      body: JSON.stringify({ taskId: selectedTask.taskId }),
+    });
+
+    const res2 = await fetch(`http://localhost:8081/task/admin/deleteTask/${selectedTask.taskId}`,{
+      method: "DELETE",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+      credentials: "include",
+    });
+
+    // if (res.ok) {
+      alert("Task deleted successfully");
+
+      // refresh tasks after deletion
+  
+      setShowTaskModal(false);
+    // } else {
+    //   throw new Error("Failed to delete task");
+    // }
+  } catch (err) {
+    console.error(err);
+    alert("Error deleting task: " + err.message);
+  }
+};
+
 
   if (!project) return <div className="loading">Loading...</div>;
 
@@ -329,6 +411,7 @@ function ProjectDetailPage() {
                     >
                       <div className="task-name">{task.taskName}</div>
                       <div className="task-description">{task.taskDescription}</div>
+
                     </div>
                   ))
                 ) : (
@@ -374,25 +457,31 @@ function ProjectDetailPage() {
                 <div className="task-detail">
                   <h3>{selectedTask.taskName}</h3>
                   <p><strong>Description:</strong> {selectedTask.taskDescription}</p>
-                  <p><strong>Task ID:</strong> {selectedTask.task_id}</p>
+                  <p><strong>Task ID:</strong> {selectedTask.taskId}</p>
                 </div>
                 
                 <div className="assign-user-section">
                   <h3>Assign User to this Task</h3>
                   <select
                     value={taskAssignment.userId}
-                    onChange={(e) => setTaskAssignment({ userId: e.target.value })}
+                    onChange={(e) => setTaskAssignment({ userId: e.target.value })} 
+                    
                   >
                     <option value="">Select User</option>
                     {allUsers.map(user => (
                       <option key={user.id} value={user.id}>
                         {user.name} ({user.email})
+                        
                       </option>
                     ))}
                   </select>
-                  <button className="assign-btn" onClick={handleAssignUserToTask}>
+                  <button className="assign-btn"
+                   onClick={ handleAssignUserToTask}> 
                     Assign User
                   </button>
+                </div>
+                <div className="delete-task-section">
+                  <button onClick ={ deleteTask }>delete Task</button>
                 </div>
               </div>
             </div>

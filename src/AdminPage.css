@@ -146,3 +146,68 @@
   cursor: pointer;
 }
 
+.Detailshow {
+  padding-top: 20px;
+  margin: 20px;
+  margin-left: 40px;
+  font-size: 22px;
+  color: rgb(162, 162, 162);
+  font-family: Verdana, Geneva, Tahoma, sans-serif;
+  cursor: pointer;
+  transition: all 0.3s ease;
+}
+
+.Detailshow.active {
+  color: white;
+  transform: scale(1.05);
+}
+
+.admin-details-body h1 {
+  color: white;
+  padding-left: 20px;
+  padding-top: 0px;
+  margin-bottom: 20px;
+}
+
+.details-module {
+  flex: 1;
+  max-width: 500px;
+}
+
+.details-container {
+  display: flex;
+  flex-direction: column;
+  gap: 15px;
+}
+
+.detail-item {
+  /* display: flex; */
+  justify-content: space-between;
+  padding:  15px;
+  background-color: #cbcdce;
+  border-radius: 8px;
+}
+
+.detail-label {
+  font-weight: bold;
+  color: #28354a;
+}
+
+.detail-value {
+  color: #000;
+  padding-left:10px
+}
+
+/* Update the modules-container for my details page */
+.admin-details-body .modules-container {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+  gap: 20px;
+}
+
+/* Make sure list items in my details section have proper spacing */
+.admin-details-body .list-item {
+  margin-bottom: 10px;
+  padding: 12px;
+}
+

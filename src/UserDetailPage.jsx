@@ -106,6 +106,25 @@ function UserDetailPage() {
   const RemoveUser = async() => {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
+        
+        const proj = await fetch(`http://localhost:8081/project_user/admin/deleteByUser`,{
+          method: "DELETE",
+          credentials: "include",
+          headers:{
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({userId: id}),
+        })
+
+        const tas = await fetch(`http://localhost:8081/task_User/admin/deleteByUser`,{
+          method: "DELETE",
+          credentials: "include",
+          headers:{
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({userId: id}),
+        })
+
         const res = await fetch(`http://localhost:8081/user/admin/deleteUser/${id}`, {
           method: "DELETE",
           credentials: "include"
@@ -120,6 +139,46 @@ function UserDetailPage() {
         }
       } catch (err) {
         alert(err);
+      }
+    }
+  };
+
+  // remove task from user - UPDATED FOR CORRECT ENDPOINT
+  const removeTask = async (taskId) => {
+    if (window.confirm("Are you sure you want to remove this task from the user?")) {
+      try {
+        const res = await fetch(`http://localhost:8081/task_User/admin/deleteByUserandTask`, {
+          method: "DELETE",
+          credentials: "include",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ 
+            userId: parseInt(id), 
+            taskId: parseInt(taskId) 
+          }),
+        });
+
+        const result = await res.text();
+        
+        if (result === "success") {
+          alert("Task removed successfully");
+          // Refresh the tasks list
+          const tasksRes = await fetch(`http://localhost:8081/task_User/admin/TaskDetails/${id}`, {
+            method: "GET",
+            credentials: "include",
+          });
+          
+          if (tasksRes.ok) {
+            const tasksData = await tasksRes.json();
+            setTasks(tasksData);
+          }
+        } else {
+          throw new Error("Failed to remove task");
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Error removing task");
       }
     }
   };
@@ -214,8 +273,20 @@ function UserDetailPage() {
               <div className="scrollable-list">
                 {tasks.length > 0 ? (
                   tasks.map((t, index) => (
-                    <div key={t.id || index} className="list-item">
-                      {t.taskName}
+                    <div key={t.id || index} className="list-item task-item">
+                      <div className="task-info">
+                        <div className="task-name">{t.taskName}</div>
+                        {t.taskId && (
+                          <div className="task-id">ID: {t.taskId}</div>
+                        )}
+                      </div>
+                      <button 
+                        className="remove-task-btn"
+                        onClick={() => removeTask(t.taskId || t.id)}
+                        title="Remove task from user"
+                      >
+                        ×
+                      </button>
                     </div>
                   ))
                 ) : (

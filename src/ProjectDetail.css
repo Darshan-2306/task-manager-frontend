@@ -333,14 +333,6 @@
   color: #cbcdce;
 }
 
-@media (max-width: 768px) {
-  .project-cards-container {
-    flex-direction: column;
-  }
-  
-  .project-header {
-    flex-direction: column;
-    gap: 10px;
-    align-items: flex-start;
-  }
+.modal-body.delete-task-section.button{
+  color : "red";
 }

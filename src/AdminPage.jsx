@@ -18,6 +18,9 @@ function AdminPage() {
     project_name: "",
     project_description: ""
   });
+  // New state variables for tasks and user projects
+  const [myTasks, setMyTasks] = useState([]);
+  const [myProjects, setMyProjects] = useState([]);
 
   const navigate = useNavigate();
 
@@ -56,7 +59,7 @@ function AdminPage() {
         if (!res.ok) throw new Error("Failed to fetch projects");
 
         const data = await res.json();
-        console.log("Fetched projects:", data); // Debug log
+        console.log("Fetched projects:", data);
         setProjects(data);
       } catch (err) {
         console.error(err);
@@ -86,6 +89,48 @@ function AdminPage() {
     };
 
     fetchUsers();
+  }, []);
+
+  // Fetch my tasks using the /my_tasks endpoint
+  useEffect(() => {
+    const fetchMyTasks = async () => {
+      try {
+        const res = await fetch("http://localhost:8081/task_User/my_tasks", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setMyTasks(data || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch my tasks:", err);
+      }
+    };
+
+    fetchMyTasks();
+  }, []);
+
+  // Fetch my projects using the /my_projects endpoint
+  useEffect(() => {
+    const fetchMyProjects = async () => {
+      try {
+        const res = await fetch("http://localhost:8081/project_user/my_projects", {
+          method: "GET",
+          credentials: "include",
+        });
+
+        if (res.ok) {
+          const data = await res.json();
+          setMyProjects(data || []);
+        }
+      } catch (err) {
+        console.error("Failed to fetch my projects:", err);
+      }
+    };
+
+    fetchMyProjects();
   }, []);
 
   // Add user function
@@ -160,7 +205,7 @@ function AdminPage() {
 
   // Navigate to user details
   const handleUserClick = (userId) => {
-    console.log("Navigating to user ID:", userId); // Debug log
+    console.log("Navigating to user ID:", userId);
     if (userId) {
       navigate(`/user/${userId}`);
     } else {
@@ -168,13 +213,20 @@ function AdminPage() {
     }
   };
 
-  // Navigate to project details - Fixed with debugging
+  // Navigate to project details
   const handleProjectClick = (projectId) => {
-    console.log("Navigating to project ID:", projectId); // Debug log
+    console.log("Navigating to project ID:", projectId);
     if (projectId) {
       navigate(`/project/${projectId}`);
     } else {
       alert("Project ID is missing. Check the project data structure.");
+    }
+  };
+
+  // Navigate to task details
+  const handleTaskClick = (taskId) => {
+    if (taskId) {
+      navigate(`/task/${taskId}`);
     }
   };
 
@@ -188,13 +240,6 @@ function AdminPage() {
   const handleProjectInputChange = (e) => {
     const { name, value } = e.target;
     setNewProject({ ...newProject, [name]: value });
-  };
-
-  // Debug function to check project data structure
-  const debugProjectData = (project, index) => {
-    console.log(`Project ${index}:`, project);
-    console.log(`Project ${index} ID:`, project.id);
-    return project.id;
   };
 
   return (
@@ -215,6 +260,12 @@ function AdminPage() {
               onClick={() => setActiveTab("projects")}
             >
               <b>Projects</b>
+            </div>
+            <div 
+              className={`Detailshow ${activeTab === "mydetails" ? "active" : ""}`} 
+              onClick={() => setActiveTab("mydetails")}
+            >
+              <b>My Details</b>
             </div>
           </div>
           
@@ -275,7 +326,7 @@ function AdminPage() {
                   </div>
                 </div>
               </div>
-            ) : (
+            ) : activeTab === "projects" ? (
               <div className="projectbody">
                 <h1>Projects Available: {projects.length}</h1>
                 
@@ -284,9 +335,8 @@ function AdminPage() {
                     <h2>All Projects</h2>
                     <div className="list-container">
                       {projects.map((project, index) => {
-                        // Debug the project data
                         const projectId = project.id || project.projectId || project.projectID;
-                        console.log(`Rendering project ${index}:`, project, "ID:", projectId);
+                        console.log(`Rendering project ${index}:`, project, 'ID:', projectId);
                         
                         return (
                           <div 
@@ -320,6 +370,94 @@ function AdminPage() {
                         onChange={handleProjectInputChange}
                       />
                       <button onClick={handleAddProject}>Add Project</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <div className="admin-details-body">
+                <h1>My Details</h1>
+                
+                <div className="modules-container">
+                  <div className="admin-card details-module">
+                    <h2>Admin Information</h2>
+                    <div className="details-container">
+                      {admin ? (
+                        <>
+                          <div className="detail-item">
+                            <span className="detail-label">ID:</span>
+                            <span className="detail-value">{admin.id || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <span className="detail-label">Name:</span>
+                            <span className="detail-value">{admin.name || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <span className="detail-label">Email:</span>
+                            <span className="detail-value">{admin.email || "N/A"}</span>
+                          </div>
+                          <div className="detail-item">
+                            <span className="detail-label">Role:</span>
+                            <span className="detail-value">{admin.role || "N/A"}</span>
+                          </div>
+                        </>
+                      ) : (
+                        <p>Loading admin details...</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* My Tasks Module */}
+                  <div className="admin-card list-module">
+                    <h2>My Tasks ({myTasks.length})</h2>
+                    <div className="list-container">
+                      {myTasks.length > 0 ? (
+                        myTasks.map((task, index) => (
+                          <div 
+                            key={task.id || index} 
+                            className="list-item clickable"
+                            onClick={() => handleTaskClick(task.id)}
+                          >
+                            <p><b>ID:</b> {task.taskId} | <b>Title:</b> {task.taskName}</p>
+                    
+                            {task.due_date && (
+                              <p><b>Due Date:</b> {new Date(task.due_date).toLocaleDateString()}</p>
+                            )}
+                          </div>
+                        ))
+                      ) : (
+                        <div className="list-item">
+                          <p>No tasks assigned</p>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {/* My Projects Module */}
+                  <div className="admin-card list-module">
+                    <h2>My Projects ({myProjects.length})</h2>
+                    <div className="list-container">
+                      {myProjects.length > 0 ? (
+                        myProjects.map((project, index) => {
+                          const projectId = project.id || project.project_id || project.projectID;
+                          return (
+                            <div 
+                              key={projectId || index} 
+                              className="list-item clickable"
+                              onClick={() => handleProjectClick(projectId)}
+                            >
+                              <p><b>ID:</b> {projectId} | <b>Name:</b> {project.project_name || project.name}</p>
+                              {project.project_description && (
+                                <p><b>Description:</b> {project.project_description}</p>
+                              )}
+                            </div>
+                          );
+                        })
+                      ) : (
+                        <div className="list-item">
+                          <p>No projects assigned</p>
+                        </div>
+                      )}
                     </div>
                   </div>
                 </div>
