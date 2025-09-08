@@ -39,7 +39,7 @@ function AdminPage() {
         setAdmin(data);
       } catch (err) {
         console.error(err);
-        alert("Session expired, please log in again");
+        alert("session time out");
         navigate("/");
       }
     };
@@ -84,7 +84,7 @@ function AdminPage() {
         setUsers(data);
       } catch (err) {
         console.error(err);
-        alert("Session expired, please log in again");
+      
       }
     };
 

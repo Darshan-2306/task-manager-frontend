@@ -27,8 +27,9 @@ function UserDetailPage() {
         setUser(data);
         setEditUser(data); // for editing
       } catch (err) {
+        navigate("/");
         console.error(err);
-        alert("Error fetching user details");
+
       }
     };
     fetchUser();
@@ -178,6 +179,7 @@ function UserDetailPage() {
         }
       } catch (err) {
         console.error(err);
+        
         alert("Error removing task");
       }
     }

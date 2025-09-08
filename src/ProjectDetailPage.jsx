@@ -36,8 +36,8 @@ function ProjectDetailPage() {
         setProject(data);
         setEditProject({ project_name: data.project_name, project_description: data.project_description });
       } catch (err) {
+        navigate("/");
         console.error(err);
-        alert("Error fetching project details");
       }
     };
 
@@ -384,7 +384,6 @@ function ProjectDetailPage() {
                   users.map((user, index) => (
                     <div key={user.id || index} className="user-item">
                       <div className="user-info">
-                       
                         <div className="user-name">{user.id}.    {user.name}</div>
                         <div className="user-email">{user.email}</div>
                       </div>
