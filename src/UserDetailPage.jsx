@@ -27,7 +27,8 @@ function UserDetailPage() {
         setUser(data);
         setEditUser(data); // for editing
       } catch (err) {
-        navigate("/");
+        alert("session time out");
+        await navigate("/");
         console.error(err);
 
       }

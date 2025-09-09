@@ -15,6 +15,8 @@ function ProjectDetailPage() {
   const [selectedTask, setSelectedTask] = useState(null);
   const [showTaskModal, setShowTaskModal] = useState(false);
   const [taskAssignment, setTaskAssignment] = useState({ userId: ""});
+  const [taskFiles, setTaskFiles] = useState({});
+  const [selectedFiles, setSelectedFiles] = useState([]);
 
   const [newTask, setNewTask] = useState({
     taskName: "",
@@ -36,7 +38,8 @@ function ProjectDetailPage() {
         setProject(data);
         setEditProject({ project_name: data.project_name, project_description: data.project_description });
       } catch (err) {
-        navigate("/");
+        alert("session time out");
+        await navigate("/");
         console.error(err);
       }
     };
@@ -90,7 +93,7 @@ function ProjectDetailPage() {
     fetchTasks();
     fetchUsers();
     fetchAllUsers();
-  }, [id, token]);
+  }, [id, token, navigate]);
 
   // Edit project input handler
   const handleInputChange = (e) => {
@@ -102,6 +105,11 @@ function ProjectDetailPage() {
   const handleNewTaskChange = (e) => {
     const { name, value } = e.target;
     setNewTask({ ...newTask, [name]: value });
+  };
+
+  // Handle file selection
+  const handleFileChange = (e) => {
+    setSelectedFiles(Array.from(e.target.files));
   };
 
   // Save edited project
@@ -129,7 +137,6 @@ function ProjectDetailPage() {
   const RemoveProject = async () => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
-
         const proj = await fetch(`http://localhost:8081/project_user/admin/deleteByProject`,{
           method : "DELETE",
           credentials: "include",
@@ -139,15 +146,14 @@ function ProjectDetailPage() {
           body: JSON.stringify({projectId : id})
         })
 
-       const task = await fetch(`http://localhost:8081/task_User/admin/deleteByProj`,{
+        const task = await fetch(`http://localhost:8081/task_User/admin/deleteByProj`,{
           method : "DELETE",
           credentials: "include",
           headers:{
             "Content-Type": "application/json",
           },
           body: JSON.stringify({projectId : id})
-       })
-
+        })
 
         const res = await fetch(`http://localhost:8081/project/admin/deleteProject/${id}`, {
           method: "DELETE",
@@ -167,7 +173,44 @@ function ProjectDetailPage() {
     }
   };
 
-  // Create new task
+  // Upload files for a task
+  const uploadFiles = async (taskId, files) => {
+    if (!files || files.length === 0) return;
+    
+    const formData = new FormData();
+    formData.append("taskId", taskId.toString());
+    
+    files.forEach(file => {
+      formData.append("files", file);
+    });
+    
+    try {
+      const res = await fetch("http://localhost:8081/sftp/upload-multiple", {
+        method: "POST",
+        headers: { 
+          Authorization: `Bearer ${token}`
+        },
+        credentials: "include",
+        body: formData,
+      });
+      
+      if (res.ok) {
+        const result = await res.text();
+        console.log("Files uploaded successfully:", result);
+        // Refresh files for this task
+        await fetchTaskFiles(taskId);
+        return true;
+      } else {
+        const errorText = await res.text();
+        throw new Error(`Failed to upload files: ${res.status} - ${errorText}`);
+      }
+    } catch (err) {
+      console.error("Error uploading files:", err);
+      throw err;
+    }
+  };
+
+  // Create new task with optional file upload
   const handleCreateTask = async () => {
     if (!newTask.taskName || !newTask.taskDescription) {
       alert("Please fill all fields to create a task");
@@ -175,6 +218,7 @@ function ProjectDetailPage() {
     }
 
     try {
+      // First create the task
       const res = await fetch("http://localhost:8081/task/admin/addTask", {
         method: "POST",
         headers: { 
@@ -188,10 +232,7 @@ function ProjectDetailPage() {
       const result = await res.text();
       
       if (res.ok && result === "success") {
-        alert("Task created successfully");
-        setNewTask({ taskName: "", taskDescription: "", projectId: id });
-        
-        // Refresh tasks list
+        // Refresh tasks list to get the new task ID
         const tasksRes = await fetch(`http://localhost:8081/task/admin/getTaskByProjectId/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
@@ -201,7 +242,26 @@ function ProjectDetailPage() {
         if (tasksRes.ok) {
           const tasksData = await tasksRes.json();
           setTasks(tasksData);
+          
+          // Find the newly created task (assuming it's the last one)
+          const newTaskObj = tasksData[tasksData.length - 1];
+          
+          // Upload files if any were selected
+          if (selectedFiles.length > 0) {
+            try {
+              await uploadFiles(newTaskObj.taskId, selectedFiles);
+              alert("Task created successfully with files uploaded");
+            } catch (uploadError) {
+              alert("Task created successfully but file upload failed: " + uploadError.message);
+            }
+          } else {
+            alert("Task created successfully");
+          }
         }
+        
+        // Reset form
+        setNewTask({ taskName: "", taskDescription: "", projectId: id });
+        setSelectedFiles([]);
       } else {
         throw new Error(result || "Failed to create task");
       }
@@ -211,9 +271,36 @@ function ProjectDetailPage() {
     }
   };
 
-  const handleTaskClick = (task) => {
+  // Fetch files for a specific task - USING CORRECT ENDPOINT
+  const fetchTaskFiles = async (taskId) => {
+    try {
+      // Using the correct endpoint /getAttachedFiles with query parameter
+      const res = await fetch(`http://localhost:8081/sftp/getAttachedFiles?taskId=${taskId}`,
+    {
+      method: "GET",
+      headers: { Authorization: `Bearer ${token}` },
+    }
+  );
+      
+      if (res.ok) {
+        const files = await res.json();
+        setTaskFiles(prev => ({ ...prev, [taskId]: files }));
+        console.log(`Found ${files.length} files for task ${taskId}`);
+      } else {
+        console.log("No files found for this task or error fetching files");
+        setTaskFiles(prev => ({ ...prev, [taskId]: [] }));
+      }
+    } catch (err) {
+      console.error("Error fetching files:", err);
+      setTaskFiles(prev => ({ ...prev, [taskId]: [] }));
+    }
+  };
+
+  // Handle task click - show modal and fetch files
+  const handleTaskClick = async (task) => {
     setSelectedTask(task);
     setShowTaskModal(true);
+    await fetchTaskFiles(task.taskId);
   };
 
   const handleAssignUserToTask = async () => {
@@ -233,11 +320,11 @@ function ProjectDetailPage() {
         userId: parseInt(taskAssignment.userId)
       }
 
-       const email ={
-          toId : taskAssignment.userId,
-          subject : "task assigned",
-          body : `you are assigned to a new task id : ${assignmentData.taskId} in project-id : ${assignproject.projectId}`,
-        }
+      const email ={
+        toId : taskAssignment.userId,
+        subject : "task assigned",
+        body : `you are assigned to a new task id : ${assignmentData.taskId} in project-id : ${assignproject.projectId}`,
+      }
 
       const res = await fetch(`http://localhost:8081/task_User/admin/add`, {
         method: "POST",
@@ -248,14 +335,13 @@ function ProjectDetailPage() {
       
       if (!res.ok) throw new Error("Failed to assign user to task");
       else{
-        const addproject =  fetch(`http://localhost:8081/project_user/admin/add`,{
+        const addproject = fetch(`http://localhost:8081/project_user/admin/add`,{
           method:"Post",
           headers:{"Content-Type": "application/json", Authorization: `Bearer ${token}`},
           credentials:"include",
           body: JSON.stringify(assignproject),
-
         })
-        const sendemail =  fetch(`http://localhost:8081/api/email/send`,{
+        const sendemail = fetch(`http://localhost:8081/api/email/send`,{
           method:"POST",
           headers:{"Content-Type": "application/json", Authorization: `Bearer ${token}`},
           credentials:"include",
@@ -285,38 +371,68 @@ function ProjectDetailPage() {
   };
 
   const deleteTask = async () => {
+    if (!window.confirm("Are you sure you want to delete this task?")) return;
 
+    try {
+      const res = await fetch("http://localhost:8081/task_User/admin/deleteByTask", {
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        credentials: "include",
+        body: JSON.stringify({ taskId: selectedTask.taskId }),
+      });
 
-  if (!window.confirm("Are you sure you want to delete this task?")) return;
+      const res2 = await fetch(`http://localhost:8081/task/admin/deleteTask/${selectedTask.taskId}`,{
+        method: "DELETE",
+        headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
 
-  try {
-    const res = await fetch("http://localhost:8081/task_User/admin/deleteByTask", {
-      method: "DELETE",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      credentials: "include",
-      body: JSON.stringify({ taskId: selectedTask.taskId }),
-    });
-
-    const res2 = await fetch(`http://localhost:8081/task/admin/deleteTask/${selectedTask.taskId}`,{
-      method: "DELETE",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
-      credentials: "include",
-    });
-
-    // if (res.ok) {
       alert("Task deleted successfully");
-
-      // refresh tasks after deletion
-  
       setShowTaskModal(false);
-    // } else {
-    //   throw new Error("Failed to delete task");
-    // }
-  } catch (err) {
-    console.error(err);
-    alert("Error deleting task: " + err.message);
-  }
+      
+      // Refresh tasks list
+      const tasksRes = await fetch(`http://localhost:8081/task/admin/getTaskByProjectId/${id}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+        credentials: "include",
+      });
+      
+      if (tasksRes.ok) {
+        const tasksData = await tasksRes.json();
+        setTasks(tasksData);
+      }
+    } catch (err) {
+      console.error(err);
+      alert("Error deleting task: " + err.message);
+    }
+  };
+
+  const downloadFile = (remoteFileName) => {
+  const token = localStorage.getItem("token");
+  const url = `http://localhost:8081/sftp/download?remoteFileName=${encodeURIComponent(remoteFileName)}`;
+
+  fetch(url, {
+    method: "GET",
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  })
+    .then(async (res) => {
+      if (!res.ok) throw new Error("Download failed");
+      const blob = await res.blob();
+      const link = document.createElement("a");
+      link.href = window.URL.createObjectURL(blob);
+      link.download = remoteFileName;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    })
+    .catch((err) => {
+      console.error("Error downloading file:", err);
+      alert("Error downloading file: " + err.message);
+    });
 };
+
 
 
   if (!project) return <div className="loading">Loading...</div>;
@@ -410,7 +526,6 @@ function ProjectDetailPage() {
                     >
                       <div className="task-name">{task.taskName}</div>
                       <div className="task-description">{task.taskDescription}</div>
-
                     </div>
                   ))
                 ) : (
@@ -439,6 +554,14 @@ function ProjectDetailPage() {
                   onChange={handleNewTaskChange}
                 />
               </div>
+              <div className="form-group">
+                <input 
+                  type="file" 
+                  name="files" 
+                  multiple 
+                  onChange={handleFileChange}
+                />
+              </div>
               <button className="create-btn" onClick={handleCreateTask}>Create Task</button>
             </div>
           </div>
@@ -457,6 +580,28 @@ function ProjectDetailPage() {
                   <h3>{selectedTask.taskName}</h3>
                   <p><strong>Description:</strong> {selectedTask.taskDescription}</p>
                   <p><strong>Task ID:</strong> {selectedTask.taskId}</p>
+                  
+                  {/* Display attached files */}
+                  {taskFiles[selectedTask.taskId] && taskFiles[selectedTask.taskId].length > 0 ? (
+                    <div className="task-files">
+                      <h4>Attached Files:</h4>
+                      <ul>
+                        {taskFiles[selectedTask.taskId].map(file => (
+                          <li key={file.id} className="file-item">
+                            <span className="file-name">{file.fileName}</span>
+                            <button 
+                              className="download-btn"
+                              onClick={() => downloadFile(file.fileName)}
+                            >
+                              Download
+                            </button>
+                          </li>
+                        ))}
+                      </ul>
+                    </div>
+                  ) : (
+                    <p className="no-files">No files attached to this task</p>
+                  )}
                 </div>
                 
                 <div className="assign-user-section">
@@ -464,23 +609,20 @@ function ProjectDetailPage() {
                   <select
                     value={taskAssignment.userId}
                     onChange={(e) => setTaskAssignment({ userId: e.target.value })} 
-                    
                   >
                     <option value="">Select User</option>
                     {allUsers.map(user => (
                       <option key={user.id} value={user.id}>
                         {user.name} ({user.email})
-                        
                       </option>
                     ))}
                   </select>
-                  <button className="assign-btn"
-                   onClick={ handleAssignUserToTask}> 
+                  <button className="assign-btn" onClick={handleAssignUserToTask}> 
                     Assign User
                   </button>
                 </div>
                 <div className="delete-task-section">
-                  <button onClick ={ deleteTask }>delete Task</button>
+                  <button onClick={deleteTask}>Delete Task</button>
                 </div>
               </div>
             </div>

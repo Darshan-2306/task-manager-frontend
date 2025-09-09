@@ -18,11 +18,14 @@ function AdminPage() {
     project_name: "",
     project_description: ""
   });
-  // New state variables for tasks and user projects
   const [myTasks, setMyTasks] = useState([]);
   const [myProjects, setMyProjects] = useState([]);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [taskFiles, setTaskFiles] = useState([]);
+  const [showTaskModal, setShowTaskModal] = useState(false);
 
   const navigate = useNavigate();
+  const token = localStorage.getItem("token");
 
   // Admin details
   useEffect(() => {
@@ -40,7 +43,7 @@ function AdminPage() {
       } catch (err) {
         console.error(err);
         alert("session time out");
-        navigate("/");
+        await navigate("/");
       }
     };
 
@@ -133,6 +136,69 @@ function AdminPage() {
     fetchMyProjects();
   }, []);
 
+  // Fetch task files using the correct endpoint from ProjectDetailPage
+  const fetchTaskFiles = async (taskId) => {
+    try {
+      // Using the correct endpoint /getAttachedFiles with query parameter
+      const res = await fetch(`http://localhost:8081/sftp/getAttachedFiles?taskId=${taskId}`, {
+        method: "GET",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      
+      if (res.ok) {
+        const files = await res.json();
+        setTaskFiles(files || []);
+        console.log(`Found ${files.length} files for task ${taskId}`);
+      } else {
+        console.log("No files found for this task or error fetching files");
+        setTaskFiles([]);
+      }
+    } catch (err) {
+      console.error("Error fetching files:", err);
+      setTaskFiles([]);
+    }
+  };
+
+  // Handle task click - show modal with task details and files
+  const handleTaskClick = async (task) => {
+    setSelectedTask(task);
+    setShowTaskModal(true);
+    await fetchTaskFiles(task.id || task.taskId);
+  };
+
+  // Close task modal
+  const handleCloseModal = () => {
+    setShowTaskModal(false);
+    setSelectedTask(null);
+    setTaskFiles([]);
+  };
+
+  // Download file function from ProjectDetailPage
+  const downloadFile = (remoteFileName) => {
+    const url = `http://localhost:8081/sftp/download?remoteFileName=${encodeURIComponent(remoteFileName)}`;
+
+    fetch(url, {
+      method: "GET",
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    })
+      .then(async (res) => {
+        if (!res.ok) throw new Error("Download failed");
+        const blob = await res.blob();
+        const link = document.createElement("a");
+        link.href = window.URL.createObjectURL(blob);
+        link.download = remoteFileName;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+      })
+      .catch((err) => {
+        console.error("Error downloading file:", err);
+        alert("Error downloading file: " + err.message);
+      });
+  };
+
   // Add user function
   const handleAddUser = async () => {
     if (!newUser.name || !newUser.email || !newUser.password || !newUser.role) {
@@ -220,13 +286,6 @@ function AdminPage() {
       navigate(`/project/${projectId}`);
     } else {
       alert("Project ID is missing. Check the project data structure.");
-    }
-  };
-
-  // Navigate to task details
-  const handleTaskClick = (taskId) => {
-    if (taskId) {
-      navigate(`/task/${taskId}`);
     }
   };
 
@@ -416,7 +475,7 @@ function AdminPage() {
                           <div 
                             key={task.id || index} 
                             className="list-item clickable"
-                            onClick={() => handleTaskClick(task.id)}
+                            onClick={() => handleTaskClick(task)}
                           >
                             <p><b>ID:</b> {task.taskId} | <b>Title:</b> {task.taskName}</p>
                     
@@ -466,6 +525,67 @@ function AdminPage() {
           </div>
         </div>
       </div>
+
+      {/* Task Details Modal */}
+      {showTaskModal && selectedTask && (
+        <div className="modal-overlay" onClick={handleCloseModal}>
+          <div className="modal-content" onClick={(e) => e.stopPropagation()}>
+            <div className="modal-header">
+              <h2>Task Details</h2>
+              <button className="close-button" onClick={handleCloseModal}>×</button>
+            </div>
+            <div className="modal-body">
+              <div className="task-details">
+                <div className="detail-row">
+                  <span className="detail-label">Task ID:</span>
+                  <span className="detail-value">{selectedTask.id || selectedTask.taskId}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Name:</span>
+                  <span className="detail-value">{selectedTask.taskName || selectedTask.name}</span>
+                </div>
+                <div className="detail-row">
+                  <span className="detail-label">Description:</span>
+                  <span className="detail-value">{selectedTask.description || "No description"}</span>
+                </div>
+                {selectedTask.due_date && (
+                  <div className="detail-row">
+                    <span className="detail-label">Due Date:</span>
+                    <span className="detail-value">{new Date(selectedTask.due_date).toLocaleDateString()}</span>
+                  </div>
+                )}
+                {selectedTask.status && (
+                  <div className="detail-row">
+                    <span className="detail-label">Status:</span>
+                    <span className="detail-value">{selectedTask.status}</span>
+                  </div>
+                )}
+              </div>
+
+              <div className="task-files">
+                <h3>Attached Files</h3>
+                {taskFiles.length > 0 ? (
+                  <div className="files-list">
+                    {taskFiles.map((file, index) => (
+                      <div key={index} className="file-item">
+                        <span className="file-name">{file.fileName || file}</span>
+                        <button 
+                          className="download-button"
+                          onClick={() => downloadFile(file.fileName || file)}
+                        >
+                          Download
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                ) : (
+                  <p>No files attached to this task</p>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </>
   );
 }

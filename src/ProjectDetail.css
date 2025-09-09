@@ -246,7 +246,7 @@
 }
 
 .modal-content {
-  background: rgb(73, 72, 72);
+  background: rgb(152, 150, 150);
   border-radius: 8px;
   width: 90%;
   max-width: 500px;
@@ -265,7 +265,7 @@
 
 .modal-header h2 {
   margin: 0;
-  color: white;
+  color: rgb(7, 7, 7);
   font-size: 24px;
 }
 
@@ -333,6 +333,142 @@
   color: #cbcdce;
 }
 
-.modal-body.delete-task-section.button{
-  color : "red";
+.delete-task-section {
+  margin-top: 20px;
+  padding-top: 20px;
+  border-top: 1px solid #eee;
 }
+
+.delete-task-section button {
+  background-color: #ef4444;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  width: 100%;
+}
+
+.delete-task-section button:hover {
+  background-color: #dc2626;
+}
+
+/* File Styles */
+.file-preview {
+  margin-top: 10px;
+  padding: 10px;
+  background-color: #2d3748;
+  border-radius: 4px;
+  font-size: 14px;
+  color: #cbcdce;
+}
+
+.file-preview p {
+  margin: 0 0 5px 0;
+  font-weight: bold;
+}
+
+.file-preview ul {
+  margin: 5px 0 0 0;
+  padding-left: 20px;
+}
+
+.file-preview li {
+  margin-bottom: 3px;
+  font-size: 13px;
+}
+
+.task-files {
+  margin-top: 15px;
+  padding: 15px;
+  background-color: #747576;
+  border-radius: 6px;
+}
+
+.task-files h4 {
+  margin: 0 0 10px 0;
+  color: rgb(81, 79, 79);
+  font-size: 16px;
+  font-weight: 600;
+}
+
+.task-files ul {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.file-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 8px 0;
+  border-bottom: 1px solid #4a5568;
+}
+
+.file-item:last-child {
+  border-bottom: none;
+}
+
+.file-name {
+  flex-grow: 1;
+  margin-right: 10px;
+  color: white;
+  font-size: 14px;
+  word-break: break-word;
+}
+
+.download-btn {
+  background-color: #10b981;
+  color: white;
+  border: none;
+  padding: 4px 8px;
+  border-radius: 3px;
+  cursor: pointer;
+  font-size: 11px;
+  white-space: nowrap;
+  min-width: 60px;
+}
+
+.download-btn:hover {
+  background-color: #059669;
+  transform: translateY(-1px);
+}
+
+.no-files {
+  color: #a0aec0;
+  font-style: italic;
+  margin: 10px 0 0 0;
+  text-align: center;
+  font-size: 14px;
+}
+
+.loading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  font-size: 18px;
+  color: #cbcdce;
+}
+
+/* Scrollbar styling */
+.scrollable-list::-webkit-scrollbar {
+  width: 6px;
+}
+
+.scrollable-list::-webkit-scrollbar-track {
+  background: #2d3748;
+  border-radius: 3px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb {
+  background: #4a5568;
+  border-radius: 3px;
+}
+
+.scrollable-list::-webkit-scrollbar-thumb:hover {
+  background: #718096;
+}
+
