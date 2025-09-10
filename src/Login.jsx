@@ -1,6 +1,7 @@
 import { useNavigate } from "react-router-dom";
 import { useState } from "react";
 import Headder from "./Headder";
+import { GoogleLogin } from "@react-oauth/google";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,39 +14,73 @@ function Login() {
     navigate("/signup");
   };
 
+
   const handleLogin = async (e) => {
-  e.preventDefault();
-  try {
-    const response = await fetch("http://localhost:8081/api/auth/login", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      credentials: "include",
-      body: JSON.stringify({ email, password }),
-    });
+    e.preventDefault();
+    try {
+      const response = await fetch("http://localhost:8081/api/auth/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        credentials: "include",
+        body: JSON.stringify({ email, password }),
+      });
 
-    const data = await response.json();
+      const data = await response.json();
 
-    if (response.ok) {
-   
-      localStorage.setItem("token", data.access_token);
-      localStorage.setItem("role", data.role);
+      if (response.ok) {
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("role", data.role);
 
-      if (data.role === "Admin") {
-        navigate("/AdminPage");
+        if (data.role === "Admin") {
+          navigate("/AdminPage");
+        } else {
+          navigate("/UserPage");
+        }
       } else {
-        navigate("/UserPage");
+        setMessage(data.message || "Login failed");
       }
-    } else {
-      setMessage(data.message || "Login failed");
+    } catch (error) {
+      setMessage("Error: invalid details");
     }
-  } catch (error) {
-    setMessage("Error: invalid details");
-  }
-};
+  };
 
+ 
+  const handleGoogleLogin = async (credentialResponse) => {
+    try {
+      debugger;
+      const idToken = credentialResponse.credential;
 
+      
+      const payload = JSON.parse(atob(idToken.split(".")[1]));
+      const { sub: googleId, email, name } = payload;
+
+      const response = await fetch("http://localhost:8081/api/auth/google-login", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ googleId, email, name }),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("token", data.access_token);
+        localStorage.setItem("role", data.role);
+
+        if (data.role === "Admin") {
+          navigate("/AdminPage");
+        } else {
+          navigate("/UserPage");
+        }
+      } else {
+        setMessage(data.message || "Google login failed");
+      }
+    } catch (error) {
+      setMessage("Error: Google login failed");
+    }
+  };
 
   return (
     <>
@@ -54,6 +89,8 @@ function Login() {
         <center>
           <div className="login-form">
             <h2 className="login-title">Login</h2>
+
+            {/* Local Login */}
             <form onSubmit={handleLogin}>
               <div className="form-group">
                 <label>Email</label>
@@ -68,18 +105,26 @@ function Login() {
                 <label>Password</label>
                 <input
                   placeholder="Enter your password"
-                  type="password"  
+                  type="password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                 />
               </div>
-
               <button type="submit" className="submit-btn">
                 Sign In
               </button>
             </form>
 
             {message && <p>{message}</p>}
+
+            <div className="divider">
+              <span>or</span>
+            </div>
+
+            <GoogleLogin
+              onSuccess={handleGoogleLogin}
+              onError={() => setMessage("Google Login Failed")}
+            />
 
             <div className="divider">
               <span>or</span>
@@ -96,4 +141,3 @@ function Login() {
 }
 
 export default Login;
-
