@@ -18,6 +18,9 @@ function ProjectDetailPage() {
   const [taskFiles, setTaskFiles] = useState({});
   const [selectedFiles, setSelectedFiles] = useState([]);
 
+
+  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8081';
+
   const [newTask, setNewTask] = useState({
     taskName: "",
     taskDescription: "",
@@ -28,7 +31,7 @@ function ProjectDetailPage() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const res = await fetch(`http://localhost:8081/project/admin/getProjectById/${id}`, {
+        const res = await fetch(`${API_BASE}/project/admin/getProjectById/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -46,7 +49,7 @@ function ProjectDetailPage() {
 
     const fetchTasks = async () => {
       try {
-        const res = await fetch(`http://localhost:8081/task/admin/getTaskByProjectId/${id}`, {
+        const res = await fetch(`${API_BASE}/task/admin/getTaskByProjectId/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -61,7 +64,7 @@ function ProjectDetailPage() {
 
     const fetchUsers = async () => {
       try {
-        const res = await fetch(`http://localhost:8081/project_user/admin/UserDetail/${id}`, {
+        const res = await fetch(`${API_BASE}/project_user/admin/UserDetail/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -76,7 +79,7 @@ function ProjectDetailPage() {
 
     const fetchAllUsers = async () => {
       try {
-        const res = await fetch("http://localhost:8081/user/admin/getAllUser", {
+        const res = await fetch(`${API_BASE}/user/admin/getAllUser`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -115,7 +118,7 @@ function ProjectDetailPage() {
   // Save edited project
   const handleSave = async () => {
     try {
-      const res = await fetch(`http://localhost:8081/project/admin/updateProject/${id}`, {
+      const res = await fetch(`${API_BASE}/project/admin/updateProject/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -137,7 +140,7 @@ function ProjectDetailPage() {
   const RemoveProject = async () => {
     if (window.confirm("Are you sure you want to delete this project?")) {
       try {
-        const proj = await fetch(`http://localhost:8081/project_user/admin/deleteByProject`,{
+        const proj = await fetch(`${API_BASE}/project_user/admin/deleteByProject`,{
           method : "DELETE",
           credentials: "include",
           headers:{
@@ -146,7 +149,7 @@ function ProjectDetailPage() {
           body: JSON.stringify({projectId : id})
         })
 
-        const task = await fetch(`http://localhost:8081/task_User/admin/deleteByProj`,{
+        const task = await fetch(`${API_BASE}/task_User/admin/deleteByProj`,{
           method : "DELETE",
           credentials: "include",
           headers:{
@@ -155,7 +158,7 @@ function ProjectDetailPage() {
           body: JSON.stringify({projectId : id})
         })
 
-        const res = await fetch(`http://localhost:8081/project/admin/deleteProject/${id}`, {
+        const res = await fetch(`${API_BASE}/project/admin/deleteProject/${id}`, {
           method: "DELETE",
           credentials: "include",
         });
@@ -185,7 +188,7 @@ function ProjectDetailPage() {
     });
     
     try {
-      const res = await fetch("http://localhost:8081/sftp/upload-multiple", {
+      const res = await fetch(`${API_BASE}/sftp/upload-multiple`, {
         method: "POST",
         headers: { 
           Authorization: `Bearer ${token}`
@@ -219,7 +222,7 @@ function ProjectDetailPage() {
 
     try {
       // First create the task
-      const res = await fetch("http://localhost:8081/task/admin/addTask", {
+      const res = await fetch(`${API_BASE}/task/admin/addTask`, {
         method: "POST",
         headers: { 
           "Content-Type": "application/json", 
@@ -233,7 +236,7 @@ function ProjectDetailPage() {
       
       if (res.ok && result === "success") {
         // Refresh tasks list to get the new task ID
-        const tasksRes = await fetch(`http://localhost:8081/task/admin/getTaskByProjectId/${id}`, {
+        const tasksRes = await fetch(`${API_BASE}/task/admin/getTaskByProjectId/${id}`, {
           method: "GET",
           headers: { Authorization: `Bearer ${token}` },
           credentials: "include",
@@ -275,7 +278,7 @@ function ProjectDetailPage() {
   const fetchTaskFiles = async (taskId) => {
     try {
       // Using the correct endpoint /getAttachedFiles with query parameter
-      const res = await fetch(`http://localhost:8081/sftp/getAttachedFiles?taskId=${taskId}`,
+      const res = await fetch(`${API_BASE}/sftp/getAttachedFiles?taskId=${taskId}`,
     {
       method: "GET",
       headers: { Authorization: `Bearer ${token}` },
@@ -326,7 +329,7 @@ function ProjectDetailPage() {
         body : `you are assigned to a new task id : ${assignmentData.taskId} in project-id : ${assignproject.projectId}`,
       }
 
-      const res = await fetch(`http://localhost:8081/task_User/admin/add`, {
+      const res = await fetch(`${API_BASE}/task_User/admin/add`, {
         method: "POST",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -335,13 +338,13 @@ function ProjectDetailPage() {
       
       if (!res.ok) throw new Error("Failed to assign user to task");
       else{
-        const addproject = fetch(`http://localhost:8081/project_user/admin/add`,{
+        const addproject = fetch(`${API_BASE}/project_user/admin/add`,{
           method:"Post",
           headers:{"Content-Type": "application/json", Authorization: `Bearer ${token}`},
           credentials:"include",
           body: JSON.stringify(assignproject),
         })
-        const sendemail = fetch(`http://localhost:8081/api/email/send`,{
+        const sendemail = fetch(`${API_BASE}/api/email/send`,{
           method:"POST",
           headers:{"Content-Type": "application/json", Authorization: `Bearer ${token}`},
           credentials:"include",
@@ -354,7 +357,7 @@ function ProjectDetailPage() {
       setShowTaskModal(false);
       
       // Refresh users list
-      const usersRes = await fetch(`http://localhost:8081/project_user/admin/UserDetail/${id}`, {
+      const usersRes = await fetch(`${API_BASE}/project_user/admin/UserDetail/${id}`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -374,14 +377,14 @@ function ProjectDetailPage() {
     if (!window.confirm("Are you sure you want to delete this task?")) return;
 
     try {
-      const res = await fetch("http://localhost:8081/task_User/admin/deleteByTask", {
+      const res = await fetch(`${API_BASE}/task_User/admin/deleteByTask`, {
         method: "DELETE",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         credentials: "include",
         body: JSON.stringify({ taskId: selectedTask.taskId }),
       });
 
-      const res2 = await fetch(`http://localhost:8081/task/admin/deleteTask/${selectedTask.taskId}`,{
+      const res2 = await fetch(`${API_BASE}/task/admin/deleteTask/${selectedTask.taskId}`,{
         method: "DELETE",
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -391,7 +394,7 @@ function ProjectDetailPage() {
       setShowTaskModal(false);
       
       // Refresh tasks list
-      const tasksRes = await fetch(`http://localhost:8081/task/admin/getTaskByProjectId/${id}`, {
+      const tasksRes = await fetch(`${API_BASE}/task/admin/getTaskByProjectId/${id}`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
         credentials: "include",
@@ -409,7 +412,7 @@ function ProjectDetailPage() {
 
   const downloadFile = (remoteFileName) => {
   const token = localStorage.getItem("token");
-  const url = `http://localhost:8081/sftp/download?remoteFileName=${encodeURIComponent(remoteFileName)}`;
+  const url = `${API_BASE}/sftp/download?remoteFileName=${encodeURIComponent(remoteFileName)}`;
 
   fetch(url, {
     method: "GET",

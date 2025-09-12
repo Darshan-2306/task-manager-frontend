@@ -4,6 +4,8 @@ import Headder from "./Headder";
 import { useNavigate } from "react-router-dom";
 import "./AdminPage.css";
 
+
+
 function AdminPage() {
   const [admin, setAdmin] = useState({});
   const [activeTab, setActiveTab] = useState("users");
@@ -28,6 +30,10 @@ function AdminPage() {
   const navigate = useNavigate();
   const token = localStorage.getItem("token");
 
+  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8081';
+
+  
+
   // Logout function
   const handleLogout = () => {
     // Clear token from localStorage
@@ -40,7 +46,7 @@ function AdminPage() {
   useEffect(() => {
     const fetchAdmin = async () => {
       try {
-        const res = await fetch("http://localhost:8081/user/my_details", {
+        const res = await fetch(`${API_BASE}/user/my_details`, {
           method: "GET",
           credentials: "include",
            headers: {
@@ -67,7 +73,7 @@ function AdminPage() {
   useEffect(() => {
     const fetchProject = async () => {
       try {
-        const res = await fetch("http://localhost:8081/project/admin/getAllProject", {
+        const res = await fetch(`${API_BASE}/project/admin/getAllProject`, {
           method: "GET",
           headers: {
     Authorization: `Bearer ${token}`,   // 🔑 JWT goes here
@@ -93,7 +99,7 @@ function AdminPage() {
   useEffect(() => {
     const fetchUsers = async () => {
       try {
-        const res = await fetch("http://localhost:8081/user/admin/getAllUser", {
+        const res = await fetch(`${API_BASE}/user/admin/getAllUser`, {
           headers: {
          "Authorization": `Bearer ${token}`,   // 🔑 JWT goes here
          "Content-Type": "application/json"
@@ -119,7 +125,7 @@ function AdminPage() {
   useEffect(() => {
     const fetchMyTasks = async () => {
       try {
-        const res = await fetch("http://localhost:8081/task_User/my_tasks", {
+        const res = await fetch(`${API_BASE}/task_User/my_tasks`, {
           method: "GET",
           credentials: "include",
         });
@@ -140,7 +146,7 @@ function AdminPage() {
   useEffect(() => {
     const fetchMyProjects = async () => {
       try {
-        const res = await fetch("http://localhost:8081/project_user/my_projects", {
+        const res = await fetch(`${API_BASE}/project_user/my_projects`, {
           method: "GET",
           credentials: "include",
         });
@@ -161,7 +167,7 @@ function AdminPage() {
   const fetchTaskFiles = async (taskId) => {
     try {
       // Using the correct endpoint /getAttachedFiles with query parameter
-      const res = await fetch(`http://localhost:8081/sftp/getAttachedFiles?taskId=${taskId}`, {
+      const res = await fetch(`${API_BASE}/sftp/getAttachedFiles?taskId=${taskId}`, {
         method: "GET",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -196,7 +202,7 @@ function AdminPage() {
 
   // Download file function from ProjectDetailPage
   const downloadFile = (remoteFileName) => {
-    const url = `http://localhost:8081/sftp/download?remoteFileName=${encodeURIComponent(remoteFileName)}`;
+    const url = `${API_BASE}/sftp/download?remoteFileName=${encodeURIComponent(remoteFileName)}`;
 
     fetch(url, {
       method: "GET",
@@ -228,7 +234,7 @@ function AdminPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:8081/user/admin/newUser", {
+      const res = await fetch(`${API_BASE}/user/admin/newUser`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -241,7 +247,7 @@ function AdminPage() {
       setNewUser({ name: "", email: "", password: "", role: "USER" });
       
       // Refresh users list
-      const usersRes = await fetch("http://localhost:8081/user/admin/getAllUser", {
+      const usersRes = await fetch(`${API_BASE}/user/admin/getAllUser`, {
         method: "GET",
         credentials: "include",
         headers: {
@@ -267,7 +273,7 @@ function AdminPage() {
     }
 
     try {
-      const res = await fetch("http://localhost:8081/project/admin/addNewProject", {
+      const res = await fetch(`${API_BASE}/project/admin/addNewProject`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -280,7 +286,7 @@ function AdminPage() {
       setNewProject({ project_name: "", project_description: "" });
       
       // Refresh projects list
-      const projectsRes = await fetch("http://localhost:8081/project/admin/getAllProject", {
+      const projectsRes = await fetch(`${API_BASE}/project/admin/getAllProject`, {
         method: "GET",
         credentials: "include",
       });

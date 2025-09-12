@@ -14,11 +14,13 @@ function Login() {
     navigate("/signup");
   };
 
+  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8081'; 
+
 
   const handleLogin = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:8081/api/auth/login", {
+      const response = await fetch(`${API_BASE}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -51,12 +53,10 @@ function Login() {
     try {
       debugger;
       const idToken = credentialResponse.credential;
-
-      
       const payload = JSON.parse(atob(idToken.split(".")[1]));
       const { sub: googleId, email, name } = payload;
 
-      const response = await fetch("http://localhost:8081/api/auth/google-login", {
+      const response = await fetch(`${API_BASE}/api/auth/google-login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

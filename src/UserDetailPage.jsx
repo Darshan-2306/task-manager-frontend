@@ -12,12 +12,13 @@ function UserDetailPage() {
   const [projects, setProjects] = useState([]);
   const [tasks, setTasks] = useState([]);
   const navigate = useNavigate();
+  const API_BASE = import.meta.env.VITE_API_BASE || 'http://localhost:8081';
 
   // fetch user
   useEffect(() => {
     const fetchUser = async () => {
       try {
-        const res = await fetch(`http://localhost:8081/user/admin/getUser/${id}`, {
+        const res = await fetch(`${API_BASE}/user/admin/getUser/${id}`, {
           method: "GET",
           credentials: "include",
         });
@@ -40,7 +41,7 @@ function UserDetailPage() {
   useEffect(() => {
     const fetchProjects = async () => {
       try {
-        const res = await fetch(`http://localhost:8081/project_user/admin/ProjectDetail/${id}`, {
+        const res = await fetch(`${API_BASE}/project_user/admin/ProjectDetail/${id}`, {
           method: "GET",
           credentials: "include",
         });
@@ -57,7 +58,7 @@ function UserDetailPage() {
   useEffect(() => {
     const fetchTasks = async () => {
       try {
-        const res = await fetch(`http://localhost:8081/task_User/admin/TaskDetails/${id}`, {
+        const res = await fetch(`${API_BASE}/task_User/admin/TaskDetails/${id}`, {
           method: "GET",
           credentials: "include",
         });
@@ -85,7 +86,7 @@ function UserDetailPage() {
     try {
       const updatedUser = { ...editUser, password: null };
 
-      const res = await fetch(`http://localhost:8081/user/admin/updateUser/${id}`, {
+      const res = await fetch(`${API_BASE}/user/admin/updateUser/${id}`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -109,7 +110,7 @@ function UserDetailPage() {
     if (window.confirm("Are you sure you want to delete this user?")) {
       try {
         
-        const proj = await fetch(`http://localhost:8081/project_user/admin/deleteByUser`,{
+        const proj = await fetch(`${API_BASE}/project_user/admin/deleteByUser`,{
           method: "DELETE",
           credentials: "include",
           headers:{
@@ -118,7 +119,7 @@ function UserDetailPage() {
           body: JSON.stringify({userId: id}),
         })
 
-        const tas = await fetch(`http://localhost:8081/task_User/admin/deleteByUser`,{
+        const tas = await fetch(`${API_BASE}/task_User/admin/deleteByUser`,{
           method: "DELETE",
           credentials: "include",
           headers:{
@@ -127,7 +128,7 @@ function UserDetailPage() {
           body: JSON.stringify({userId: id}),
         })
 
-        const res = await fetch(`http://localhost:8081/user/admin/deleteUser/${id}`, {
+        const res = await fetch(`${API_BASE}/user/admin/deleteUser/${id}`, {
           method: "DELETE",
           credentials: "include"
         });
@@ -149,7 +150,7 @@ function UserDetailPage() {
   const removeTask = async (taskId) => {
     if (window.confirm("Are you sure you want to remove this task from the user?")) {
       try {
-        const res = await fetch(`http://localhost:8081/task_User/admin/deleteByUserandTask`, {
+        const res = await fetch(`${API_BASE}/task_User/admin/deleteByUserandTask`, {
           method: "DELETE",
           credentials: "include",
           headers: {
@@ -166,7 +167,7 @@ function UserDetailPage() {
         if (result === "success") {
           alert("Task removed successfully");
           // Refresh the tasks list
-          const tasksRes = await fetch(`http://localhost:8081/task_User/admin/TaskDetails/${id}`, {
+          const tasksRes = await fetch(`${API_BASE}/task_User/admin/TaskDetails/${id}`, {
             method: "GET",
             credentials: "include",
           });
